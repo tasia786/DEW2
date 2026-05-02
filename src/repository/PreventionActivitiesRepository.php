@@ -2,6 +2,7 @@
 require_once __DIR__ . '/RepositoryInterface.php';
 require_once __DIR__ . '/../util/appendInQuery.php';
 require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../model/PreventionActivity.php';
 
 class PreventionActivitiesRepository implements RepositoryInterface
 {
@@ -16,10 +17,10 @@ class PreventionActivitiesRepository implements RepositoryInterface
         $stmt->execute($params);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        return $result;
+        return PreventionActivity::fromArrayToObjsSet($result);
     }
 }
 
-//print_r(new PreventionActivitiesRepository()->selectWithFilter(['2021,2022', 'copii,parinti'], ['year', 'beneficiary']));
-print_r(new PreventionActivitiesRepository()->selectWithFilter([], []));
+print_r(new PreventionActivitiesRepository()->selectWithFilter(['2021,2022', 'copii,parinti'], ['year', 'beneficiary']));
+//print_r(new PreventionActivitiesRepository()->selectWithFilter([], []));
 

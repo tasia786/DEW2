@@ -2,6 +2,7 @@
 require_once __DIR__ . '/RepositoryInterface.php';
 require_once __DIR__ . '/../util/appendInQuery.php';
 require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../model/CrimeGeneral.php';
 
 class CrimesGeneralRepository implements RepositoryInterface
 {
@@ -16,7 +17,7 @@ class CrimesGeneralRepository implements RepositoryInterface
         $stmt->execute($params);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        return $result;
+        return CrimeGeneral::fromArrayToObjsSet($result);
     }
 }
 
