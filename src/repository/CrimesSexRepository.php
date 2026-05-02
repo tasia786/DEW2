@@ -21,5 +21,4 @@ class CrimesSexRepository implements RepositoryInterface
     }
 }
 
-print_r(new CrimesSexRepository()->selectWithFilter(['2021,2022', 'Majori,Minori', 'Bărbați'], ['year', 'age_category', 'sex']));
 

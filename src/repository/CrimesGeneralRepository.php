@@ -21,5 +21,4 @@ class CrimesGeneralRepository implements RepositoryInterface
     }
 }
 
-print_r(new CrimesGeneralRepository()->selectWithFilter(['2021,2022', 'Persoane cercetate,Persoane trimise în judecată'], ['year', 'category']));
 

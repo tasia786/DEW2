@@ -21,5 +21,4 @@ class CriminalGroupsRepository implements RepositoryInterface
     }
 }
 
-print_r(new CriminalGroupsRepository()->selectWithFilter(['2021,2022', 'Grupări identificate'], ['year', 'field_name']));
 

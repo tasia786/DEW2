@@ -21,5 +21,4 @@ class CrimesSentencesRepository implements RepositoryInterface
     }
 }
 
-print_r(new CrimesSentencesRepository()->selectWithFilter(['2021,2022', 'Suspendarea pedepsei', 'Legea nr. 194/2011'], ['year', 'sentence_type', 'law']));
 

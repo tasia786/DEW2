@@ -20,5 +20,3 @@ class EmergenciesRepository implements RepositoryInterface
         return Emergency::fromArrayToObjsSet($result);
     }
 }
-
-print_r(new EmergenciesRepository()->selectWithFilter(['2021,2022', 'NSP'], ['year', 'drug']));

@@ -21,4 +21,3 @@ class CampaignsProjectsRepository implements RepositoryInterface
     }
 }
 
-print_r(new CampaignsProjectsRepository()->selectWithFilter(['2021,2022', 'campanie'], ['year', 'type']));

@@ -21,4 +21,3 @@ class SeizuresRepository implements RepositoryInterface
     }
 }
 
-print_r(new SeizuresRepository()->selectWithFilter(['2021,2022', 'MDMA'], ['year', 'drug_type']));

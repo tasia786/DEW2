@@ -21,6 +21,3 @@ class PreventionActivitiesRepository implements RepositoryInterface
     }
 }
 
-print_r(new PreventionActivitiesRepository()->selectWithFilter(['2021,2022', 'copii,parinti'], ['year', 'beneficiary']));
-//print_r(new PreventionActivitiesRepository()->selectWithFilter([], []));
-

@@ -21,5 +21,4 @@ class CrimesLawRepository implements RepositoryInterface
     }
 }
 
-print_r(new CrimesLawRepository()->selectWithFilter(['2021,2022', 'Art.7 din Legea nr. 143/2000,Art.2 din Legea nr. 143/2000'], ['year', 'article']));
 
