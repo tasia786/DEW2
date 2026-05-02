@@ -29,4 +29,13 @@ class CrimeGeneral {
         }
         return $models;
     }
+
+    public function toArray(): array {
+        return [
+            'id'       => $this->id,
+            'year'     => $this->year,
+            'category' => $this->category,
+            'value'    => $this->value,
+        ];
+    }
 }

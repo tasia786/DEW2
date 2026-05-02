@@ -34,4 +34,14 @@ class CrimeSex {
         }
         return $models;
     }
+
+    public function toArray(): array {
+        return [
+            'id'           => $this->id,
+            'year'         => $this->year,
+            'sex'          => $this->sex,
+            'age_category' => $this->ageCategory,
+            'value'        => $this->value,
+        ];
+    }
 }

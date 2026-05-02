@@ -30,4 +30,13 @@ class CriminalGroup {
         }
         return $models;
     }
+
+    public function toArray(): array {
+        return [
+            'id'         => $this->id,
+            'year'       => $this->year,
+            'field_name' => $this->fieldName,
+            'value'      => $this->value,
+        ];
+    }
 }

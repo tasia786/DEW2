@@ -42,10 +42,12 @@ class Response
     public static function error(string $message, int $status = 500): void
     {
         self::json(['error' => $message], $status);
+        exit;
     }
 
     public static function badRequest(string $message, int $status = 400): void
     {
         self::json(['bad_request' => $message], $status);
+        exit;
     }
 }

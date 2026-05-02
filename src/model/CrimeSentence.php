@@ -34,4 +34,14 @@ class CrimeSentence {
         }
         return $models;
     }
+
+    public function toArray(): array {
+        return [
+            'id'            => $this->id,
+            'year'          => $this->year,
+            'sentence_type' => $this->sentenceType,
+            'law'           => $this->law,
+            'value'         => $this->value,
+        ];
+    }
 }

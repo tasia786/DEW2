@@ -33,4 +33,14 @@ class CampaignProject {
         }
         return $models;
     }
+
+    public function toArray(): array {
+        return [
+            'id'                  => $this->id,
+            'year'                => $this->year,
+            'type'                => $this->type,
+            'name'                => $this->name,
+            'beneficiaries_count' => $this->beneficiariesCount,
+        ];
+    }
 }

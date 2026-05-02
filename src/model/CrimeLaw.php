@@ -30,4 +30,13 @@ class CrimeLaw {
         }
         return $models;
     }
+
+    public function toArray(): array {
+        return [
+            'id'      => $this->id,
+            'year'    => $this->year,
+            'article' => $this->article,
+            'value'   => $this->value,
+        ];
+    }
 }

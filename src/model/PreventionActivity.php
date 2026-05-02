@@ -33,4 +33,14 @@ class PreventionActivity {
         }
         return $models;
     }
+
+    public function toArray(): array {
+        return [
+            'id'          => $this->id,
+            'year'        => $this->year,
+            'environment' => $this->environment,
+            'beneficiary' => $this->beneficiary,
+            'value'       => $this->value,
+        ];
+    }
 }

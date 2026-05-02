@@ -34,4 +34,14 @@ class Seizure {
         }
         return $models;
     }
+
+    public function toArray(): array {
+        return [
+            'id'           => $this->id,
+            'year'         => $this->year,
+            'drug_type'    => $this->drugType,
+            'seizure_type' => $this->seizureType,
+            'value'        => $this->value,
+        ];
+    }
 }
