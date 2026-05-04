@@ -1,17 +1,6 @@
 <?php
-require_once __DIR__ . '/../../model/CrimeGeneral.php';
-require_once __DIR__ . '/../../model/CrimeLaw.php';
-require_once __DIR__ . '/../../model/CrimeSex.php';
-require_once __DIR__ . '/../../model/CriminalGroup.php';
-require_once __DIR__ . '/../../model/CrimeSentence.php';
-require_once __DIR__ . '/../../repository/CrimesGeneralRepository.php';
-require_once __DIR__ . '/../../repository/CrimesLawRepository.php';
-require_once __DIR__ . '/../../repository/CrimesSexRepository.php';
-require_once __DIR__ . '/../../repository/CriminalGroupsRepository.php';
-require_once __DIR__ . '/../../repository/CrimesSentencesRepository.php';
 
-
-function parseCrimes(string $fileName, int $year): void
+function parseCrimes(string $fileName, int $year, PDO $db): void
 {
     if (!file_exists($fileName)) {
         throw new RuntimeException("-File not found: {$fileName}");
@@ -22,14 +11,35 @@ function parseCrimes(string $fileName, int $year): void
         throw new RuntimeException("-Cannot open file: {$fileName}");
     }
 
-    $crimeGeneralRepo = new CrimesGeneralRepository();
-    $crimeLawRepo = new CrimesLawRepository();
-    $crimeSexRepo = new CrimesSexRepository();
-    $criminalGroupsRepo = new CriminalGroupsRepository();
-    $crimesSentencesRepo = new CrimesSentencesRepository();
+    $stmt1 = $db->prepare(
+        "INSERT INTO crimes_general (year, category, value)
+         VALUES (?, ?, ?)"
+    );
+
+    $stmt2 = $db->prepare(
+        "INSERT INTO crimes_law (year, article, value)
+         VALUES (?, ?, ?)"
+    );
+
+    $stmt3 = $db->prepare(
+        "INSERT INTO crimes_sex (year, sex, age_category, value)
+         VALUES (?, ?, ?, ?)"
+    );
+
+    $stmt4 = $db->prepare(
+        "INSERT INTO criminal_groups (year, field_name, value)
+         VALUES (?, ?, ?)"
+    );
+
+    $stmt5 = $db->prepare(
+        "INSERT INTO crimes_sentences (year, sentence_type, law, value)
+         VALUES (?, ?, ?, ?)"
+    );
+
 
     $toInt   = fn($v) => ($v !== '' && $v !== null) ? (int)$v   : null;
 
+    $db->beginTransaction();
     try {
         $data = fgetcsv($open, 1000, ',', '"', '\\');
         while (($data = fgetcsv($open, 1000, ',', '"', '\\')) !== false) {
@@ -39,12 +49,11 @@ function parseCrimes(string $fileName, int $year): void
                 break;
             }
 
-            $crimeGeneralRepo->insert(new CrimeGeneral(
-                null,
+            $stmt1->execute([
                 $year,
                 trim($data[0]),
                 $toInt($data[1])
-            ));
+            ]);
         }
         while (($data = fgetcsv($open, 1000, ',', '"', '\\')) !== false) {
             if (empty(trim($data[0] ?? ''))) continue;
@@ -53,12 +62,11 @@ function parseCrimes(string $fileName, int $year): void
                 break;
             }
 
-            $crimeLawRepo->insert(new CrimeLaw(
-                null,
+            $stmt2->execute([
                 $year,
                 trim($data[0]),
                 $toInt($data[1])
-            ));
+            ]);
         }
 
         while (($data = fgetcsv($open, 1000, ',', '"', '\\')) !== false) {
@@ -69,21 +77,18 @@ function parseCrimes(string $fileName, int $year): void
                 break;
             }
 
-            $crimeSexRepo->insert(new CrimeSex(
-                null,
+            $stmt3->execute([
                 $year,
                 trim($data[0]),
                 "Majori",
                 $toInt($data[1])
-            ));
-
-            $crimeSexRepo->insert(new CrimeSex(
-                null,
+            ]);
+            $stmt3->execute([
                 $year,
                 trim($data[0]),
                 "Minori",
                 $toInt($data[2])
-            ));
+            ]);
         }
 
         while (($data = fgetcsv($open, 1000, ',', '"', '\\')) !== false) {
@@ -93,34 +98,35 @@ function parseCrimes(string $fileName, int $year): void
                 break;
             }
 
-            $criminalGroupsRepo->insert(new CriminalGroup(
-                null,
+            $stmt4->execute([
                 $year,
                 trim($data[0]),
-                $toInt(trim($data[1]))
-            ));
+                trim($data[1])
+            ]);
         }
+
 
         while (($data = fgetcsv($open, 1000, ',', '"', '\\')) !== false) {
             if (empty(trim($data[0] ?? ''))) continue;
 
 
-            $crimesSentencesRepo->insert(new CrimeSentence(
-                null,
+            $stmt5->execute([
                 $year,
                 trim($data[0]),
                 "Legea nr. 143/2000",
                 $toInt($data[1])
-            ));
-
-            $crimesSentencesRepo->insert(new CrimeSentence(
-                null,
+            ]);
+            $stmt5->execute([
                 $year,
                 trim($data[0]),
                 "Legea nr. 194/2011",
                 $toInt($data[2])
-            ));
+            ]);
         }
+        $db->commit();
+    } catch (PDOException $e) {
+        $db->rollBack();
+        throw $e;
     } finally {
         fclose($open);
     }

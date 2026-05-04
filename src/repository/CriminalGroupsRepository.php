@@ -6,6 +6,16 @@ require_once __DIR__ . '/../model/CriminalGroup.php';
 
 class CriminalGroupsRepository implements RepositoryInterface
 {
+    private PDOStatement $insertStmt;
+
+    public function __construct()
+    {
+        $this->insertStmt = Database::getConnection()->prepare(
+            "INSERT INTO criminal_groups (year, field_name, value)
+             VALUES (?, ?, ?)"
+        );
+    }
+    
     public function selectWithFilter(array $values, array $dbColumnNames)
     {
         $params = [];
@@ -18,6 +28,15 @@ class CriminalGroupsRepository implements RepositoryInterface
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return CriminalGroup::fromArrayToObjsSet($result);
+    }
+
+    public function insert(object $model): bool
+    {
+        return $this->insertStmt->execute([
+            $model->getYear(),
+            $model->getFieldName(),
+            $model->getValue()
+        ]);
     }
 }
 
