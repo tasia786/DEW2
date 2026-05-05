@@ -1,8 +1,6 @@
 <?php
-require_once __DIR__ . '/../../model/Seizure.php';
-require_once __DIR__ . '/../../repository/SeizuresRepository.php';
 
-function parseSeizures(string $fileName, int $year): void
+function parseSeizures(string $fileName, int $year, PDO $db): void
 {
     if (!file_exists($fileName)) {
         throw new RuntimeException("-File does not exist: {$fileName}");
@@ -13,11 +11,15 @@ function parseSeizures(string $fileName, int $year): void
         throw new RuntimeException("-Cannot open: {$fileName}");
     }
 
-    $seizureRepo = new SeizuresRepository();
+    $stmt = $db->prepare(
+        "INSERT INTO seizures (year, drug_type, seizure_type, value)
+         VALUES (?, ?, ?, ?)"
+    );
 
     $toFloat = fn($v) => ($v !== '' && $v !== null) ? (float)$v : null;
     $seizureTypes = ['Grame', 'Comprimate', 'Doze/Buc', 'Mililitri', 'Nr. Capturi'];
 
+    $db->beginTransaction();
     try {
         $data = fgetcsv($open, 1000, ',', '"', '\\');
         while (($data = fgetcsv($open, 1000, ',', '"', '\\')) !== false) {
@@ -29,15 +31,18 @@ function parseSeizures(string $fileName, int $year): void
                     continue;
                 }
 
-                $seizureRepo->insert(new Seizure(
-                    null,
+                $stmt->execute([
                     $year,
                     trim($data[0]),
                     $seizureTypes[$index],
                     $value
-                ));
+                ]);
             }
         }
+        $db->commit();
+    } catch (PDOException $e) {
+        $db->rollBack();
+        throw $e;
     } finally {
         fclose($open);
     }

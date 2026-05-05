@@ -1,9 +1,9 @@
 <?php
 require_once 'db_schema.php';
-require_once __DIR__ . '/../src/util/parsers/seizures.php'; 
-require_once __DIR__ . '/../src/util/parsers/emergencies.php'; 
-require_once __DIR__ . '/../src/util/parsers/prevention.php'; 
-require_once __DIR__ . '/../src/util/parsers/crimes.php'; 
+require_once __DIR__ . '/parsers/seizures.php'; 
+require_once __DIR__ . '/parsers/emergencies.php'; 
+require_once __DIR__ . '/parsers/prevention.php'; 
+require_once __DIR__ . '/parsers/crimes.php'; 
 
 
 $db = new PDO('sqlite:' . __DIR__ . '/../data/database.sqlite');

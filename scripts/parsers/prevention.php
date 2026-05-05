@@ -1,10 +1,6 @@
 <?php
-require_once __DIR__ . '/../../model/CampaignProject.php';
-require_once __DIR__ . '/../../model/PreventionActivity.php';
-require_once __DIR__ . '/../../repository/CampaignsProjectsRepository.php';
-require_once __DIR__ . '/../../repository/PreventionActivitiesRepository.php';
 
-function parsePrevention(string $fileName, int $year): void
+function parsePrevention(string $fileName, int $year, PDO $db): void
 {
     if (!file_exists($fileName)) {
         throw new RuntimeException("-File does not exist: {$fileName}");
@@ -15,13 +11,21 @@ function parsePrevention(string $fileName, int $year): void
         throw new RuntimeException("-Cannot open: {$fileName}");
     }
 
-    $campaignProjectRepo = new CampaignsProjectsRepository();
-    $prevenionActivityRepo = new PreventionActivitiesRepository();
+    $stmt1 = $db->prepare(
+        "INSERT INTO campaigns_projects (year, type, name, beneficiaries_count)
+         VALUES (?, ?, ?, ?)"
+    );
+
+    $stmt2 = $db->prepare(
+        "INSERT INTO prevention_activities (year, environment, beneficiary, value)
+         VALUES (?, ?, ?, ?)"
+    );
 
     $beneficiaries = ['activitati_total', 'copii', 'parinti', 'cadre_didactice', 'studenti', 'persoane', 'elevi'];
     $toInt   = fn($v) => ($v !== '' && $v !== null) ? (int)$v   : null;
     $type = "unknown";
 
+    $db->beginTransaction();
     try {
         while (($data = fgetcsv($open, 1000, ',', '"', '\\')) !== false) {
             if ((count($data) != 2 && count($data) != 8) || empty(trim($data[0]))) continue;
@@ -36,13 +40,12 @@ function parsePrevention(string $fileName, int $year): void
                     continue;
                 }
 
-                $campaignProjectRepo->insert(new CampaignProject(
-                    null,
+                $stmt1->execute([
                     $year,
                     $type,
                     trim($data[0]),
                     $toInt($data[1])
-                ));
+                ]);
             } else {
                 if (strpos(strtolower($data[1]), "nr.") !== FALSE) {
                     continue;
@@ -54,16 +57,19 @@ function parsePrevention(string $fileName, int $year): void
                         continue;
                     }
 
-                    $prevenionActivityRepo->insert(new PreventionActivity(
-                        null,
+                    $stmt2->execute([
                         $year,
                         trim($data[0]),
                         $beneficiaries[$index],
                         $value
-                    ));
+                    ]);
                 }
             }
         }
+        $db->commit();
+    } catch (PDOException $e) {
+        $db->rollBack();
+        throw $e;
     } finally {
         fclose($open);
     }
