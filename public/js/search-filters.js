@@ -197,6 +197,11 @@ function submitSearchForm() {
         params.set('type', type);
     }
 
+     if (tableName.startsWith('criminal_')) {
+        const type = tableName.replace('criminal_', '');
+        params.set('type', type);
+    }
+
     Object.entries(filters).forEach(([filterName, value]) => {
         const paramName = queryParamMap[filterName];
         if (!paramName || !value) return;
