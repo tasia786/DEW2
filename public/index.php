@@ -18,7 +18,7 @@ include __DIR__ . '/templates/header.php';
 
       <div class="grid-2col">
 
-          <div class="card" id="search-form">
+          <form class="card" id="search-form">
             <h2 class="card-title">FILTERS</h2>
 
             <div class="form-group">
@@ -43,12 +43,12 @@ include __DIR__ . '/templates/header.php';
               <button class="btn btn-primary" type="submit" id="btn-search">Search</button>
               <button class="btn btn-ghost btn-sm" type="reset" id="btn-clear">Reset</button>
             </div>
-          </div>
+          </form>
         
         <div>
           <div class="card" id="results-empty-state">
             <div>
-              Results
+              Loading..
             </div>
           </div>
         </div>

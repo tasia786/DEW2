@@ -12,11 +12,11 @@ if (!isset($activePage)) $activePage = '';
   <title><?php echo $pageTitle; ?> – Drug Explorer</title>
 
   
-  <link rel="stylesheet" href="/css/base/variables.css">
-  <link rel="stylesheet" href="/css/base/reset.css">
+  <link rel="stylesheet" href="/public/css/base/variables.css">
+  <link rel="stylesheet" href="/public/css/base/reset.css">
 
-  <link rel="stylesheet" href="/css/layout/grid.css">
-  <link rel="stylesheet" href="/css/components/components.css">
+  <link rel="stylesheet" href="/public/css/layout/grid.css">
+  <link rel="stylesheet" href="/public/css/components/components.css">
 </head>
 <body>
 
