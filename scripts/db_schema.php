@@ -4,7 +4,8 @@ function initSchema(PDO $db): void
 {
     $tables = [
         'seizures', 'emergencies', 'campaigns_projects', 'prevention_activities', 
-        'crimes_general', 'crimes_sex', 'crimes_law', 'crimes_sentences', 'criminal_groups'
+        'crimes_general', 'crimes_sex', 'crimes_law', 'crimes_sentences', 'criminal_groups', 
+        'users'
     ];
 
     foreach ($tables as $table) {
@@ -79,4 +80,10 @@ function initSchema(PDO $db): void
         field_name TEXT,
         value      INTEGER
     )");
+
+    $db->exec("CREATE TABLE users (
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT    NOT NULL UNIQUE,
+    password TEXT    NOT NULL  
+    );");
 }

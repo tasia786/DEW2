@@ -22,3 +22,6 @@ parsePrevention(__DIR__ . "/../data_csv/prevenire-2021.csv", 2021, $db);
 
 parseCrimes(__DIR__ . "/../data_csv/infractionalitate-2022.csv", 2022, $db);
 parseCrimes(__DIR__ . "/../data_csv/infractionalitate-2021.csv", 2021, $db);
+
+$hash = password_hash('parolaCute', PASSWORD_BCRYPT);
+$db->exec("INSERT INTO users (username, password) VALUES ('admin', '{$hash}')");
