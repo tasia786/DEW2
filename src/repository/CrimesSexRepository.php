@@ -7,6 +7,7 @@ require_once __DIR__ . '/../model/CrimeSex.php';
 class CrimesSexRepository implements RepositoryInterface
 {
     private PDOStatement $insertStmt;
+    private array $acceptedColumns = ['id', 'year', 'sex', 'age_category', 'value'];
 
     public function __construct()
     {
@@ -15,13 +16,13 @@ class CrimesSexRepository implements RepositoryInterface
              VALUES (?, ?, ?, ?)"
         );
     }
-    
+
     public function selectWithFilter(array $values, array $dbColumnNames)
     {
         $params = [];
         $query = appendInQuery($values, $dbColumnNames, 'crimes_sex', $params);
 
-        $db=Database::getConnection();
+        $db = Database::getConnection();
 
         $stmt = $db->prepare($query);
         $stmt->execute($params);
@@ -39,6 +40,18 @@ class CrimesSexRepository implements RepositoryInterface
             $model->getValue()
         ]);
     }
+
+    public function selectDistinct(string $columnName): ?array
+    {
+        $columnName = strtolower($columnName);
+        if (!in_array($columnName, $this->acceptedColumns)) {
+            return null;
+        }
+
+        $stmt = Database::getConnection()->prepare(
+            "SELECT DISTINCT " . $columnName . " FROM crimes_sex ORDER BY " . $columnName
+        );
+        $stmt->execute();
+        return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), $columnName);
+    }
 }
-
-

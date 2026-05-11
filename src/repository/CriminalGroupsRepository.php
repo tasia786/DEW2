@@ -7,6 +7,7 @@ require_once __DIR__ . '/../model/CriminalGroup.php';
 class CriminalGroupsRepository implements RepositoryInterface
 {
     private PDOStatement $insertStmt;
+    private array $acceptedColumns = ['id', 'year', 'field_name', 'value'];
 
     public function __construct()
     {
@@ -15,13 +16,13 @@ class CriminalGroupsRepository implements RepositoryInterface
              VALUES (?, ?, ?)"
         );
     }
-    
+
     public function selectWithFilter(array $values, array $dbColumnNames)
     {
         $params = [];
         $query = appendInQuery($values, $dbColumnNames, 'criminal_groups', $params);
 
-        $db=Database::getConnection();
+        $db = Database::getConnection();
 
         $stmt = $db->prepare($query);
         $stmt->execute($params);
@@ -38,6 +39,17 @@ class CriminalGroupsRepository implements RepositoryInterface
             $model->getValue()
         ]);
     }
+    public function selectDistinct(string $columnName): ?array
+    {
+        $columnName = strtolower($columnName);
+        if (!in_array($columnName, $this->acceptedColumns)) {
+            return null;
+        }
+
+        $stmt = Database::getConnection()->prepare(
+            "SELECT DISTINCT " . $columnName . " FROM criminal_groups ORDER BY " . $columnName
+        );
+        $stmt->execute();
+        return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), $columnName);
+    }
 }
-
-
