@@ -43,4 +43,18 @@ class EmergencyController
         $result = array_map(fn($e) => $e->toArray(), $data);
         Response::sendData($result);
     }
+
+    public function selectOptions(): void
+    {
+        if (!isset($_GET['column']) || empty($_GET['column'])) {
+            Response::badRequest("column must be specified");
+            return;
+        }
+
+        if (!Validator::validString($_GET['column'], ['id', 'year', 'criterion_value', 'drug', 'value'])) {
+            Response::badRequest('Invalid column; accepted: id, year, criterion_value, drug, value');
+            return;
+        }
+        Response::json($this->emergencyRepo->selectDistinct($_GET['column']));
+    }
 }

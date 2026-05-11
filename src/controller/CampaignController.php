@@ -56,13 +56,14 @@ class CampaignController
 
             if (isset($_GET['beneficiary']) && !empty($_GET['beneficiary'])) {
                 if (!Validator::validString($_GET['beneficiary'], [
-                    'activitati_total', 
-                    'copii', 
-                    'parinti', 
-                    'cadre_didactice', 
-                    'studenti', 
-                    'persoane', 
-                    'elevi'])) {
+                    'activitati_total',
+                    'copii',
+                    'parinti',
+                    'cadre_didactice',
+                    'studenti',
+                    'persoane',
+                    'elevi'
+                ])) {
                     Response::badRequest('Invalid beneficiary type; alowwed: activitati_total, copii, parinti, cadre_didactice, studenti, persoane, elevi');
                     return;
                 }
@@ -75,5 +76,32 @@ class CampaignController
         }
 
         Response::sendData($result);
+    }
+
+    public function selectOptions(): void
+    {
+        if (!isset($_GET['activity']) || empty($_GET['activity']) || !in_array($_GET['activity'], ['prevention', 'project'], true)) {
+            Response::badRequest('activity is required; accepted: prevention, project');
+            return;
+        }
+
+        if (!isset($_GET['column']) || empty($_GET['column'])) {
+            Response::badRequest("column must be specified");
+            return;
+        }
+
+        if ($_GET['activity'] === 'project') {
+            if (!Validator::validString($_GET['column'], ['id', 'year', 'type', 'name', 'value'])) {
+                Response::badRequest('Invalid column; accepted: id, year, type, name, value');
+                return;
+            }
+            Response::json($this->campaignProjectRepo->selectDistinct($_GET['column']));
+        } else {
+            if (!Validator::validString($_GET['column'], ['id', 'year', 'environment', 'beneficiary', 'value'])) {
+                Response::badRequest('Invalid column; accepted: id, year, environment, beneficiary, value');
+                return;
+            }
+            Response::json($this->preventionActivitiesRepo->selectDistinct($_GET['column']));
+        }
     }
 }

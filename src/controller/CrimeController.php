@@ -56,6 +56,63 @@ class CrimesController
         Response::sendData($result);
     }
 
+    public function selectOptions(): void
+    {
+        if (!isset($_GET['type']) || empty($_GET['type']) || !in_array($_GET['type'], ['general', 'sex', 'law', 'sentences', 'groups'], true)) {
+            Response::badRequest('type is required; accepted: general, sex, law, sentences, groups');
+            return;
+        }
+
+        if (!isset($_GET['column']) || empty($_GET['column'])) {
+            Response::badRequest("column must be specified");
+            return;
+        }
+
+        switch ($_GET['type']) {
+            case 'general':
+                if (!Validator::validString($_GET['column'], ['id', 'year', 'category', 'value'])) {
+                    Response::badRequest('Invalid column, accepted: id, year, category, value');
+                    return;
+                }
+                break;
+            case 'sex':
+                if (!Validator::validString($_GET['column'], ['id', 'year', 'sex', 'age_category', 'value'])) {
+                    Response::badRequest('Invalid column, accepted: id, year, sex, age_category, value');
+                    return;
+                }
+                break;
+            case 'law':
+                if (!Validator::validString($_GET['column'], ['id', 'year', 'article', 'value'])) {
+                    Response::badRequest('Invalid column, accepted: id, year, article, value');
+                    return;
+                }
+                break;
+            case 'sentences':
+                if (!Validator::validString($_GET['column'], ['id', 'year', 'sentence_type', 'law', 'value'])) {
+                    Response::badRequest('Invalid column, accepted: id, year, sentence_type, law, value');
+                    return;
+                }
+                break;
+            case 'groups':
+                if (!Validator::validString($_GET['column'], ['id', 'year', 'field_name', 'value'])) {
+                    Response::badRequest('Invalid column, accepted: id, year, field_name, value');
+                    return;
+                }
+                break;
+        }
+
+
+        $data = match ($_GET['type']) {
+            'general'   => $this->generalRepo->selectDistinct($_GET['column']),
+            'sex'       => $this->sexRepo->selectDistinct($_GET['column']),
+            'law'       => $this->lawRepo->selectDistinct($_GET['column']),
+            'sentences' => $this->sentencesRepo->selectDistinct($_GET['column']),
+            'groups'    => $this->groupsRepo->selectDistinct($_GET['column']),
+        };
+
+        Response::json($data);
+    }
+
     private function handleGeneral(array $values, array $columnNames): array
     {
         if (isset($_GET['category']) && !empty($_GET['category'])) {
