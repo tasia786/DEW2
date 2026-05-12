@@ -1,18 +1,27 @@
+/* ==========================================================================
+   HEADER & NAVIGATION
+   ========================================================================== */
+
 .app-header {
-  padding: 0 var(--space-10);
   background: rgb(152, 204, 195);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
   z-index: 100;
+  padding: 0 var(--space-4);
+  /* Padding redus pe mobil */
 }
 
 .app-nav {
   width: 100%;
-  height: var(--header-height);
+  min-height: var(--header-height);
   display: flex;
+  flex-direction: column;
+  /* Elemente stivuite vertical pe mobil */
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  padding: var(--space-4) 0;
+  gap: var(--space-4);
 }
 
 .app-nav-brand {
@@ -24,6 +33,9 @@
 .app-nav-list {
   display: flex;
   gap: var(--space-2);
+  flex-wrap: wrap;
+  /* Permite link-urilor să treacă pe rând nou pe ecrane mici */
+  justify-content: center;
 }
 
 .app-nav-link {
@@ -32,8 +44,8 @@
   color: var(--color-text-secondary);
   font-size: var(--font-size-lg);
   font-weight: 500;
+  white-space: nowrap;
 }
-
 
 .app-nav-link:hover,
 .app-nav-link.is-active {
@@ -41,30 +53,18 @@
   color: var(--color-accent-dark);
 }
 
-
-.app-main {
-  padding: var(--space-12);
-}
-
-
-.container {
-  max-width: var(--content-max);
-  margin: 0 auto;
-}
+/* ==========================================================================
+   MAIN LAYOUT & CONTAINERS
+   ========================================================================== */
 
 
-.grid-2col {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: var(--space-6);
-  align-items: start;
-}
-
+/* ==========================================================================
+   PAGE HEADERS
+   ========================================================================== */
 
 .page-header {
   margin-bottom: var(--space-6);
 }
-
 
 .page-title {
   font-family: var(--font-display);
@@ -72,9 +72,68 @@
   color: var(--color-text-primary);
 }
 
-
 .page-subtitle {
   font-size: var(--font-size-xl);
   color: var(--color-text-secondary);
   margin-top: var(--space-1);
+}
+
+/* ==========================================================================
+   RESPONSIVE ADJUSTMENTS (Desktop)
+   ========================================================================== */
+
+/* Ajustări pentru Tablete/Laptops (peste 768px) */
+@media (min-width: 768px) {
+  .app-header {
+    padding: 0 var(--space-10);
+  }
+
+  .app-nav {
+    flex-direction: row;
+    /* Navigația revine la format orizontal */
+    justify-content: space-between;
+    height: var(--header-height);
+    padding: 0;
+  }
+}
+
+/* Ajustări pentru Desktop (peste 1024px) */
+
+.app-main {
+  padding: var(--space-4);
+}
+
+.grid-2col {
+  grid-template-columns: 320px 1fr;
+  /* Filtrele revin în stânga rezultatelor */
+  display: grid;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+
+
+.container {
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+@media(max-width: 768px){
+  .grid-2col{
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+}
+
+
+/* ==========================================================================
+   SAFETY RESETS
+   ========================================================================== */
+
+img,
+table,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
 }

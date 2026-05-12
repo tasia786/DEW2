@@ -62,4 +62,9 @@ include __DIR__ . '/templates/header.php';
 </body>
 </html>
 
-<script src="js/search-filters.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/filter.js"></script>
+<script src="js/result.js"></script>
+<script src="js/search.js"></script>
