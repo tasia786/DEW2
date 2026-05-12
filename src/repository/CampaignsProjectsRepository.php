@@ -7,6 +7,7 @@ require_once __DIR__ . '/../model/CampaignProject.php';
 class CampaignsProjectsRepository implements RepositoryInterface
 {
     private PDOStatement $insertStmt;
+    private array $acceptedColumns = ['id', 'year', 'type', 'name', 'value'];
 
     public function __construct()
     {
@@ -38,5 +39,18 @@ class CampaignsProjectsRepository implements RepositoryInterface
             $model->getName(),
             $model->getBeneficiariesCount()
         ]);
+    }
+    public function selectDistinct(string $columnName): ?array
+    {
+        $columnName = strtolower($columnName);
+        if (!in_array($columnName, $this->acceptedColumns)) {
+            return null;
+        }
+
+        $stmt = Database::getConnection()->prepare(
+            "SELECT DISTINCT " . $columnName . " FROM campaigns_projects ORDER BY " . $columnName
+        );
+        $stmt->execute();
+        return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), $columnName);
     }
 }

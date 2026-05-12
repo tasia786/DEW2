@@ -7,6 +7,7 @@ require_once __DIR__ . '/../model/CrimeGeneral.php';
 class CrimesGeneralRepository implements RepositoryInterface
 {
     private PDOStatement $insertStmt;
+    private array $acceptedColumns = ['id', 'year', 'category', 'value'];
 
     public function __construct()
     {
@@ -37,5 +38,19 @@ class CrimesGeneralRepository implements RepositoryInterface
             $model->getCategory(),
             $model->getValue()
         ]);
+    }
+
+    public function selectDistinct(string $columnName): ?array
+    {
+        $columnName = strtolower($columnName);
+        if (!in_array($columnName, $this->acceptedColumns)) {
+            return null;
+        }
+
+        $stmt = Database::getConnection()->prepare(
+            "SELECT DISTINCT " . $columnName . " FROM crimes_general ORDER BY " . $columnName
+        );
+        $stmt->execute();
+        return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), $columnName);
     }
 }

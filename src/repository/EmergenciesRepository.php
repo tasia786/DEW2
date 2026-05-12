@@ -7,6 +7,7 @@ require_once __DIR__ . '/../model/Emergency.php';
 class EmergenciesRepository implements RepositoryInterface
 {
     private PDOStatement $insertStmt;
+    private array $acceptedColumns = ['id', 'year', 'criterion_value', 'drug', 'value'];
 
     public function __construct()
     {
@@ -38,5 +39,19 @@ class EmergenciesRepository implements RepositoryInterface
             $model->getDrug(),
             $model->getValue()
         ]);
+    }
+
+    public function selectDistinct(string $columnName): ?array
+    {
+        $columnName = strtolower($columnName);
+        if (!in_array($columnName, $this->acceptedColumns)) {
+            return null;
+        }
+
+        $stmt = Database::getConnection()->prepare(
+            "SELECT DISTINCT " . $columnName . " FROM emergencies ORDER BY " . $columnName
+        );
+        $stmt->execute();
+        return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), $columnName);
     }
 }

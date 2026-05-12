@@ -7,6 +7,7 @@ require_once __DIR__ . '/../model/PreventionActivity.php';
 class PreventionActivitiesRepository implements RepositoryInterface
 {
     private PDOStatement $insertStmt;
+    private array $acceptedColumns = ['id', 'year', 'environment', 'beneficiary', 'value'];
 
     public function __construct()
     {
@@ -15,13 +16,13 @@ class PreventionActivitiesRepository implements RepositoryInterface
              VALUES (?, ?, ?, ?)"
         );
     }
-    
+
     public function selectWithFilter(array $values, array $dbColumnNames)
     {
         $params = [];
         $query = appendInQuery($values, $dbColumnNames, 'prevention_activities', $params);
 
-        $db=Database::getConnection();
+        $db = Database::getConnection();
 
         $stmt = $db->prepare($query);
         $stmt->execute($params);
@@ -39,5 +40,18 @@ class PreventionActivitiesRepository implements RepositoryInterface
             $model->getValue()
         ]);
     }
-}
 
+    public function selectDistinct(string $columnName): ?array
+    {
+        $columnName = strtolower($columnName);
+        if (!in_array($columnName, $this->acceptedColumns)) {
+            return null;
+        }
+
+        $stmt = Database::getConnection()->prepare(
+            "SELECT DISTINCT " . $columnName . " FROM prevention_activities ORDER BY " . $columnName
+        );
+        $stmt->execute();
+        return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), $columnName);
+    }
+}

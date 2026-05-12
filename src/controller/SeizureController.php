@@ -27,8 +27,8 @@ class SeizuresController
             array_push($columnNames, 'year');
         }
 
-        if (isset($_GET['seizureType']) && !empty($_GET['seizureType'])) {
-            if (!Validator::validString($_GET['seizureType'], [
+        if (isset($_GET['column']) && !empty($_GET['column'])) {
+            if (!Validator::validString($_GET['column'], [
                 'Grame',
                 'Comprimate',
                 'Doze/Buc',
@@ -38,7 +38,7 @@ class SeizuresController
                 Response::badRequest('Invalid seizure type');
                 return;
             }
-            array_push($values, $_GET['seizureType']);
+            array_push($values, $_GET['column']);
             array_push($columnNames, 'seizure_type');
         }
 
@@ -50,5 +50,19 @@ class SeizuresController
         $data   = $this->repo->selectWithFilter($values, $columnNames);
         $result = array_map(fn($s) => $s->toArray(), $data);
         Response::sendData($result);
+    }
+
+    public function selectOptions(): void
+    {
+        if (!isset($_GET['column']) || empty($_GET['column'])) {
+            Response::badRequest("column must be specified");
+            return;
+        }
+
+        if (!Validator::validString($_GET['column'], ['id', 'year', 'drug_type', 'seizure_type', 'value'])) {
+            Response::badRequest('Invalid column; accepted: id, year, drug_type, seizure_type, value');
+            return;
+        }
+        Response::json($this->repo->selectDistinct($_GET['column']));
     }
 }
