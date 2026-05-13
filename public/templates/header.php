@@ -17,6 +17,8 @@ if (!isset($activePage)) $activePage = '';
 
   <link rel="stylesheet" href="/public/css/layout/grid.css">
   <link rel="stylesheet" href="/public/css/components/components.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body>
 

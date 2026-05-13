@@ -68,6 +68,7 @@ function renderViewControls() {
                 <span style="font-size: 15px; color: var(--color-text-secondary);">Export:</span>
                 <button type="button" class="btn btn-ghost btn-sm" onclick="downloadChart('png')">PNG</button>
                 <button type="button" class="btn btn-ghost btn-sm" onclick="downloadChart('webp')">WebP</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="downloadChart('svg')">SVG</button>
             </div>`;
     }
 
@@ -171,122 +172,274 @@ function prepareChartData(data, headers, tableName) {
     };
 }
 
+
+let currentChartInstance = null; // Reper pentru graficul activ
+
 /**
- * Randare Bar Chart Orizontal (Top 10).
+ * Funcția de export actualizată pentru ApexCharts
+ */
+window.downloadChart = function (format) {
+    if (!currentChartInstance) return;
+
+    // Preluăm numele tradus din select-ul de tabel
+    const tableSelect = document.getElementById('s-table');
+    const fileName = tableSelect && tableSelect.selectedIndex > 0
+        ? tableSelect.options[tableSelect.selectedIndex].text.toLowerCase().replace(/\s+/g, '_')
+        : 'grafic';
+
+    if (format === 'svg') {
+        currentChartInstance.exports.exportToSVG();
+    } else if (format === 'png') {
+        currentChartInstance.exports.exportToPng();
+    } else if (format === 'webp') {
+        // ApexCharts nu are WebP nativ, folosim metoda dataURI()
+        currentChartInstance.dataURI().then(({ imgURI }) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                //ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+
+                const link = document.createElement('a');
+                link.download = `vizualizare-${fileName}.webp`;
+                link.href = canvas.toDataURL('image/webp');
+                link.click();
+            };
+            img.src = imgURI;
+        });
+    }
+};
+
+/**
+ * Randare Bar Chart Orizontal (Top 10) cu ApexCharts.
  */
 function renderBarChartView(data, headers) {
     const chartData = prepareChartData(data, headers, currentTableName);
-    const canvasId = 'barCanvas-' + Math.floor(Math.random() * 1000);
+    const chartId = 'apexBarChart';
 
     requestAnimationFrame(() => {
-        const ctx = document.getElementById(canvasId);
-        if (!ctx) return;
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: chartData.labels,
-                datasets: [{
-                    label: chartData.metricName,
-                    data: chartData.values,
-                    backgroundColor: '#4f46e5',
-                    borderRadius: 4
-                }]
+        const options = {
+            series: [{
+                name: chartData.metricName,
+                data: chartData.values
+            }],
+            chart: {
+                type: 'bar',
+                height: 500, // Am mărit puțin înălțimea pentru a lăsa textele să "respire"
+                toolbar: { show: false },
+                fontFamily: 'inherit' // Preia fontul paginii tale
             },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: {
-                        ticks: {
-                            callback: function (value) {
-                                const label = this.getLabelForValue(value);
-                                return label.length > 40 ? label.substring(0, 40) + '...' : label;
-                            }
+            dataLabels: {
+                enabled: false // Dezactivează afișarea numerelor pe bare
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 4,
+                    barHeight: '70%' // Face barele puțin mai subțiri pentru a lăsa loc textului
+                }
+            },
+            colors: ['#4f46e5'],
+            xaxis: {
+                categories: chartData.labels,
+            },
+            yaxis: {
+                labels: {
+                    show: true,
+                    rotate: 0,
+                    style: {
+                        fontSize: '14px',    // Text mai mare ca în Chart.js
+                        fontWeight: 600,     // Text mai clar (îngroșat)
+                        colors: ['#374151']  // Culoare gri închis pentru contrast
+                    },
+                    maxWidth: 300,           // Permite textului să ocupe mai mult spațiu în stânga
+                    formatter: function (value) {
+                        // Logica de tăiere exact ca în codul tău vechi de Chart.js
+                        if (typeof value === 'string' && value.length > 40) {
+                            return value.substring(0, 40) + '...';
                         }
+                        return value;
+                    }
+                }
+            },
+            grid: {
+                padding: {
+                    left: 20 // Adaugă spațiu suplimentar în marginea din stânga
+                }
+            },
+            title: {
+                text: 'Top 10 Rezultate',
+                align: 'center',
+                style: {
+                    fontSize: '18px',
+                    fontWeight: 'bold'
+                }
+            },
+            // În interiorul obiectului options din renderBarChartView
+            // În interiorul options din renderBarChartView
+            // În interiorul obiectului options din renderBarChartView
+            tooltip: {
+                theme: 'light',
+                x: {
+                    show: true,
+                    formatter: function (val) {
+                        if (typeof val !== 'string') return val;
+
+                        // Aplicăm doar smartWrap pentru a pune textul pe mai multe rânduri 
+                        // dacă depășește un număr de caractere (ex: 35)
+                        return smartWrap(val, 35);
+                    }
+                },
+                y: {
+                    formatter: function (val) {
+                        return val;
                     }
                 }
             }
-        });
+        };
+
+        if (currentChartInstance) currentChartInstance.destroy();
+        currentChartInstance = new ApexCharts(document.querySelector(`#${chartId}`), options);
+        currentChartInstance.render();
     });
 
-    return `<div style="height: 450px; padding: 20px;"><canvas id="${canvasId}"></canvas></div>`;
+    return `<div id="${chartId}" style="padding: 10px; background: white;"></div>`;
 }
-
 /**
- * Randare Line Chart (Evoluție anuală).
+ * Randare Line Chart cu ApexCharts
+ */
+/**
+ * Randare Line Chart (Evoluție anuală) cu ApexCharts.
  */
 function renderLineChartView(data, headers) {
     const years = [...new Set(data.map(item => item.year))].sort();
     const metricHeader = getMetricHeader(headers);
-
+    
     const valuesPerYear = years.map(year => {
         return data
             .filter(item => item.year === year)
             .reduce((sum, item) => sum + (Number(item[metricHeader]) || 0), 0);
     });
 
-    const canvasId = 'lineCanvas-' + Math.floor(Math.random() * 1000);
+    const chartId = 'apexLineChart';
+    
+    // Preluăm numele tradus al tabelei pentru titlu
+    const tableSelect = document.getElementById('s-table');
+    const tableNameRo = tableSelect && tableSelect.selectedIndex > 0 
+        ? tableSelect.options[tableSelect.selectedIndex].text 
+        : 'Date';
 
     requestAnimationFrame(() => {
-        const ctx = document.getElementById(canvasId);
-        if (!ctx) return;
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: years,
-                datasets: [{
-                    label: 'Evolution ' + formatHeader(metricHeader),
-                    data: valuesPerYear,
-                    borderColor: '#4f46e5',
-                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                    fill: true,
-                    tension: 0.3
-                }]
+        const options = {
+            series: [{
+                name: formatHeader(metricHeader),
+                data: valuesPerYear
+            }],
+            chart: {
+                type: 'line',
+                height: 450, // Mărit pentru vizibilitate
+                toolbar: { show: false },
+                zoom: { enabled: false },
+                fontFamily: 'inherit'
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true }
+            stroke: {
+                curve: 'smooth',
+                width: 4 // Linie mai groasă și proeminentă
+            },
+            colors: ['#4f46e5'],
+            markers: {
+                size: 6, // Puncte mai mari pe linie
+                hover: { size: 8 }
+            },
+            title: {
+                text: `Evoluție Anuală - ${tableNameRo}`,
+                align: 'center',
+                style: {
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    color: '#111827'
+                }
+            },
+            xaxis: {
+                categories: years,
+                labels: {
+                    style: {
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        colors: '#374151'
+                    }
+                },
+                title: {
+                    text: 'Anul',
+                    style: {
+                        fontSize: '14px',
+                        fontWeight: 700,
+                        color: '#4b5563'
+                    }
+                }
+            },
+            yaxis: {
+                labels: {
+                    style: {
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        colors: '#374151'
+                    },
+                    formatter: (val) => Math.floor(val) // Evităm zecimalele dacă nu e cazul
+                },
+                title: {
+                    text: formatHeader(metricHeader),
+                    offsetX: -11,
+                    style: {
+                        fontSize: '14px',
+                        fontWeight: 700,
+                        color: '#4b5563'
+                    }
+                }
+            },
+            tooltip: {
+                theme: 'light',
+                x: { show: true },
+                style: {
+                    fontSize: '14px'
+                }
+            },
+            grid: {
+                borderColor: '#f1f1f1',
+                padding: {
+                    left: 20,
+                    right: 20
                 }
             }
-        });
+        };
+
+        if (currentChartInstance) currentChartInstance.destroy();
+        currentChartInstance = new ApexCharts(document.querySelector(`#${chartId}`), options);
+        currentChartInstance.render();
     });
 
-    return `<div style="height: 400px; padding: 20px;"><canvas id="${canvasId}"></canvas></div>`;
+    return `<div id="${chartId}" style="padding: 10px; background: white;"></div>`;
 }
 
-window.downloadChart = function (format) {
-    const canvas = document.querySelector('canvas');
-    if (!canvas) return;
+function smartWrap(text, maxChars = 30) {
+    if (!text || text.length <= maxChars) return text;
 
-    // 1. Preluăm numele tradus direct din elementul SELECT existent în pagină
-    const tableSelect = document.getElementById('s-table');
-    let romanianName = 'grafic';
-    
-    if (tableSelect && tableSelect.selectedIndex > 0) {
-        // Luăm textul opțiunii selectate (ex: "Capturi", "Urgențe")
-        romanianName = tableSelect.options[tableSelect.selectedIndex].text;
-        
-        // Opțional: curățăm numele pentru fișier (fără spații, litere mici)
-        romanianName = romanianName.toLowerCase().replace(/\s+/g, '_');
-    }
+    const words = text.split(' ');
+    let lines = [];
+    let currentLine = '';
 
-
-
-    // 3. Logica de export (PNG / WebP)
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = canvas.width;
-    tempCanvas.height = canvas.height;
-    const ctx = tempCanvas.getContext('2d');
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-    ctx.drawImage(canvas, 0, 0);
-
-    const link = document.createElement('a');
-    link.download = `vizualizare-${romanianName}.${format}`; // Folosim numele tradus
-    link.href = tempCanvas.toDataURL(`image/${format}`);
-    link.click();
-};
+    words.forEach(word => {
+        if ((currentLine + word).length > maxChars) {
+            lines.push(currentLine.trim());
+            currentLine = word + ' ';
+        } else {
+            currentLine += word + ' ';
+        }
+    });
+    lines.push(currentLine.trim());
+    return lines.join('<br>');
+}
