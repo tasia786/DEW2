@@ -11,36 +11,36 @@ include __DIR__ . '/templates/header.php';
 
       <div class="page-header">
         <div>
-          <h1 class="page-title">Search</h1>
-          <p class="page-subtitle">Data filtering.</p>
+          <h1 class="page-title">Căutare</h1>
+          <p class="page-subtitle">Filtrează datele.</p>
         </div>
       </div>
 
       <div class="grid-2col">
 
           <form class="card" id="search-form">
-            <h2 class="card-title">FILTERS</h2>
+            <h2 class="card-title">FILTRE</h2>
 
             <div class="form-group">
-              <label class="form-label" for="s-table">Table</label>
+              <label class="form-label" for="s-table">Tabel</label>
               <select class="form-control" id="s-table" name="table">
-                <option value="">Select a table...</option>
-                <option value="seizures">Seizures</option>
-                <option value="emergencies">Emergencies</option>
-                <option value="campaigns_projects">Campaigns Projects</option>
-                <option value="prevention_activities">Prevention Activities</option>
-                <option value="crimes_general">Crimes-General</option>
-                <option value="crimes_sex">Crimes-Sex</option>
-                <option value="crimes_law">Crimes-Law</option>
-                <option value="crimes_sentences">Crimes-Sentences</option>
-                <option value="criminal_groups">Criminal Groups</option>
+                <option value="">Selectează un tabel..</option>
+                <option value="seizures">Capturi</option>
+                <option value="emergencies">Urgențe</option>
+                <option value="campaigns_projects">Campanii și Proiecte</option>
+                <option value="prevention_activities">Activități Prevenire</option>
+                <option value="crimes_general">Infracțiuni General</option>
+                <option value="crimes_sex">Infracțiuni Sex</option>
+                <option value="crimes_law">Infracțiuni Lege</option>
+                <option value="crimes_sentences">Pedepse</option>
+                <option value="criminal_groups">Grupări Infracționale</option>
               </select>
             </div>
 
             <div id="dynamic-filters"></div>
 
             <div style="display: flex; flex-direction: column; gap: var(--space-3);">
-              <button class="btn btn-primary" type="submit" id="btn-search">Search</button>
+              <button class="btn btn-primary" type="submit" id="btn-search">Caută</button>
               <button class="btn btn-ghost btn-sm" type="reset" id="btn-clear">Reset</button>
             </div>
           </form>

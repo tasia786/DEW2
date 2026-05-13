@@ -1,13 +1,13 @@
 const tableEndpoints = {
-    seizures: '/api/Seizure.php',
-    emergencies: '/api/Emergency.php',
-    campaigns_projects: '/api/Campaigns.php',
-    prevention_activities: '/api/Campaigns.php',
-    crimes_general: '/api/Crimes.php',
-    crimes_sex: '/api/Crimes.php',
-    crimes_law: '/api/Crimes.php',
-    crimes_sentences: '/api/Crimes.php',
-    criminal_groups: '/api/Crimes.php',
+    seizures: 'http://localhost:8080/api/Seizure.php',
+    emergencies: 'http://localhost:8080/api/Emergency.php',
+    campaigns_projects: 'http://localhost:8080/api/Campaigns.php',
+    prevention_activities: 'http://localhost:8080/api/Campaigns.php',
+    crimes_general: 'http://localhost:8080/api/Crimes.php',
+    crimes_sex: 'http://localhost:8080/api/Crimes.php',
+    crimes_law: 'http://localhost:8080/api/Crimes.php',
+    crimes_sentences: 'http://localhost:8080/api/Crimes.php',
+    criminal_groups: 'http://localhost:8080/api/Crimes.php',
 };
 
 const queryParamMap = {
@@ -28,15 +28,15 @@ const queryParamMap = {
 };
 
 const optionsEndpoints = {
-    seizures: '/api/OptionsSeizure.php',
-    emergencies: '/api/OptionsEmergency.php',
-    campaigns_projects: '/api/OptionsCampaigns.php',
-    prevention_activities: '/api/OptionsCampaigns.php',
-    crimes_general: '/api/OptionsCrimes.php',
-    crimes_sex: '/api/OptionsCrimes.php',
-    crimes_law: '/api/OptionsCrimes.php',
-    crimes_sentences: '/api/OptionsCrimes.php',
-    criminal_groups: '/api/OptionsCrimes.php',
+    seizures: 'http://localhost:8080/api/OptionsSeizure.php',
+    emergencies: 'http://localhost:8080/api/OptionsEmergency.php',
+    campaigns_projects: 'http://localhost:8080/api/OptionsCampaigns.php',
+    prevention_activities: 'http://localhost:8080/api/OptionsCampaigns.php',
+    crimes_general: 'http://localhost:8080/api/OptionsCrimes.php',
+    crimes_sex: 'http://localhost:8080/api/OptionsCrimes.php',
+    crimes_law: 'http://localhost:8080/api/OptionsCrimes.php',
+    crimes_sentences: 'http://localhost:8080/api/OptionsCrimes.php',
+    criminal_groups: 'http://localhost:8080/api/OptionsCrimes.php',
 };
 
 const optionTranslations = {
@@ -53,42 +53,42 @@ const optionTranslations = {
 
 const tableFilters = {
     seizures: [
-        { name: 'year', label: 'Year', type: 'select' },
-        { name: 'drug_type', label: 'Drug Type', type: 'select' },
-        { name: 'seizure_type', label: 'Seizure Type', type: 'select' },
+        { name: 'year', label: 'An', type: 'select' },
+        { name: 'drug_type', label: 'Tip Drog', type: 'select' },
+        { name: 'seizure_type', label: 'Tip Captură', type: 'select' },
     ],
     emergencies: [
-        { name: 'year', label: 'Year', type: 'select' },
-        { name: 'criterion_value', label: 'Criterion', type: 'select' },
-        { name: 'drug', label: 'Drug', type: 'select' },
+        { name: 'year', label: 'An', type: 'select' },
+        { name: 'criterion_value', label: 'Criteriu', type: 'select' },
+        { name: 'drug', label: 'Drog', type: 'select' },
     ],
     campaigns_projects: [
-        { name: 'year', label: 'Year', type: 'select' },
+        { name: 'year', label: 'An', type: 'select' },
     ],
     prevention_activities: [
-        { name: 'year', label: 'Year', type: 'select' },
-        { name: 'environment', label: 'Environment', type: 'select' },
-        { name: 'beneficiary', label: 'Beneficiary', type: 'select' },
+        { name: 'year', label: 'An', type: 'select' },
+        { name: 'environment', label: 'Mediu', type: 'select' },
+        { name: 'beneficiary', label: 'Beneficiari', type: 'select' },
     ],
     crimes_general: [
-        { name: 'year', label: 'Year', type: 'select' },
-        { name: 'category', label: 'Category', type: 'select' },
+        { name: 'year', label: 'An', type: 'select' },
+        { name: 'category', label: 'Categorie', type: 'select' },
     ],
     crimes_sex: [
-        { name: 'year', label: 'Year', type: 'select' },
+        { name: 'year', label: 'An', type: 'select' },
         { name: 'sex', label: 'Sex', type: 'select' },
-        { name: 'age_category', label: 'Age Category', type: 'select' },
+        { name: 'age_category', label: 'Categorie vârstă', type: 'select' },
     ],
     crimes_law: [
-        { name: 'year', label: 'Year', type: 'select' },
-        { name: 'article', label: 'Article', type: 'select' },
+        { name: 'year', label: 'An', type: 'select' },
+        { name: 'article', label: 'Articol', type: 'select' },
     ],
     crimes_sentences: [
-        { name: 'year', label: 'Year', type: 'select' },
-        { name: 'sentence_type', label: 'Sentence Type', type: 'select' },
-        { name: 'law', label: 'Law', type: 'select' },
+        { name: 'year', label: 'An', type: 'select' },
+        { name: 'sentence_type', label: 'Tip pedeapsă', type: 'select' },
+        { name: 'law', label: 'Lege', type: 'select' },
     ],
     criminal_groups: [
-        { name: 'year', label: 'Year', type: 'select' }
+        { name: 'year', label: 'An', type: 'select' }
     ],
 };

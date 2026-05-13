@@ -13,7 +13,7 @@ function renderResults(data, tableName) {
     currentTableName = tableName;
 
     if (!Array.isArray(data) || data.length === 0) {
-        resultsContainer.innerHTML = `<div class="empty-state">No results found.</div>`;
+        resultsContainer.innerHTML = `<div class="empty-state">Nu s-au găsit rezultate.</div>`;
         return;
     }
 
@@ -23,7 +23,7 @@ function renderResults(data, tableName) {
     resultsContainer.innerHTML = `
     <div class="card">
         <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-6); flex-wrap: wrap;">
-            <div class="card-title" style="margin-bottom: 0;">Showing ${data.length} result${data.length === 1 ? '' : 's'}</div>
+            <div class="card-title" style="margin-bottom: 0;">${data.length} rezultate</div>
             ${renderViewControls()}
         </div>
         ${resultContent}
@@ -43,22 +43,36 @@ function getResultHeaders(data) {
  */
 function renderViewControls() {
     const views = [
-        ['table', 'Table'],
+        ['table', 'Tabel'],
         ['bar', 'Bar Chart'],
         ['line', 'Line Chart']
     ];
 
-    return `
-        <div style="display: flex; gap: var(--space-2);">
-            ${views.map(([value, label]) => `
-                <button
-                    type="button"
-                    class="btn ${resultViewMode === value ? 'btn-primary' : 'btn-ghost'} btn-sm"
-                    data-result-view="${value}"
-                >${label}</button>
-            `).join('')}
-        </div>
-    `;
+    let html = `
+        <div style="display: flex; align-items: center; gap: var(--space-4);">
+            <div style="display: flex; gap: var(--space-2);">
+                ${views.map(([value, label]) => `
+                    <button
+                        type="button"
+                        class="btn ${resultViewMode === value ? 'btn-primary' : 'btn-ghost'} btn-sm"
+                        data-result-view="${value}"
+                    >${label}</button>
+                `).join('')}
+            </div>`;
+
+    // AFIȘĂM EXPORTUL DOAR DACĂ NU SUNTEM PE TABEL
+    if (resultViewMode === 'bar' || resultViewMode === 'line') {
+        html += `
+            <div style="height: 20px; width: 1px; background: var(--color-border);"></div>
+            <div style="display: flex; gap: var(--space-2); align-items: center;">
+                <span style="font-size: 15px; color: var(--color-text-secondary);">Export:</span>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="downloadChart('png')">PNG</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="downloadChart('webp')">WebP</button>
+            </div>`;
+    }
+
+    html += `</div>`;
+    return html;
 }
 
 /**
@@ -81,7 +95,7 @@ function renderTableView(data, headers) {
     const headersHtml = headers
         .map(header => `
         <th style="padding: var(--space-3) var(--space-4); text-align: left; font-size: var(--font-size-md); color: var(--color-text-secondary); font-weight: 600; white-space: nowrap; width: ${100 / headers.length}%;">
-            ${header}
+            ${formatHeader(header)}
         </th>`)
         .join('');
 
@@ -127,14 +141,14 @@ function getMetricHeader(headers) {
 function prepareChartData(data, headers, tableName) {
     const metricHeader = getMetricHeader(headers);
     let labelHeaders;
-    
+
     // Logica specifică pentru campanii (doar numele) vs restul tabelelor (compus)
     if (tableName === 'campaigns_projects') {
-        labelHeaders = ['name']; 
+        labelHeaders = ['name'];
     } else {
         labelHeaders = headers.filter(h => h !== 'year' && h !== metricHeader);
     }
-    
+
     const summary = {};
     data.forEach(item => {
         const compositeLabel = labelHeaders
@@ -161,7 +175,7 @@ function prepareChartData(data, headers, tableName) {
  * Randare Bar Chart Orizontal (Top 10).
  */
 function renderBarChartView(data, headers) {
-    const chartData = prepareChartData(data, headers, currentTableName); 
+    const chartData = prepareChartData(data, headers, currentTableName);
     const canvasId = 'barCanvas-' + Math.floor(Math.random() * 1000);
 
     requestAnimationFrame(() => {
@@ -186,7 +200,7 @@ function renderBarChartView(data, headers) {
                 scales: {
                     y: {
                         ticks: {
-                            callback: function(value) {
+                            callback: function (value) {
                                 const label = this.getLabelForValue(value);
                                 return label.length > 40 ? label.substring(0, 40) + '...' : label;
                             }
@@ -206,7 +220,7 @@ function renderBarChartView(data, headers) {
 function renderLineChartView(data, headers) {
     const years = [...new Set(data.map(item => item.year))].sort();
     const metricHeader = getMetricHeader(headers);
-    
+
     const valuesPerYear = years.map(year => {
         return data
             .filter(item => item.year === year)
@@ -243,3 +257,36 @@ function renderLineChartView(data, headers) {
 
     return `<div style="height: 400px; padding: 20px;"><canvas id="${canvasId}"></canvas></div>`;
 }
+
+window.downloadChart = function (format) {
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return;
+
+    // 1. Preluăm numele tradus direct din elementul SELECT existent în pagină
+    const tableSelect = document.getElementById('s-table');
+    let romanianName = 'grafic';
+    
+    if (tableSelect && tableSelect.selectedIndex > 0) {
+        // Luăm textul opțiunii selectate (ex: "Capturi", "Urgențe")
+        romanianName = tableSelect.options[tableSelect.selectedIndex].text;
+        
+        // Opțional: curățăm numele pentru fișier (fără spații, litere mici)
+        romanianName = romanianName.toLowerCase().replace(/\s+/g, '_');
+    }
+
+
+
+    // 3. Logica de export (PNG / WebP)
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    const ctx = tempCanvas.getContext('2d');
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+    ctx.drawImage(canvas, 0, 0);
+
+    const link = document.createElement('a');
+    link.download = `vizualizare-${romanianName}.${format}`; // Folosim numele tradus
+    link.href = tempCanvas.toDataURL(`image/${format}`);
+    link.click();
+};

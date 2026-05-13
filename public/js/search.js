@@ -43,13 +43,13 @@ function submitSearchForm() {
 
     const tableName = tableSelect.value;
     if (!tableName) {
-        renderError('Please select a table first.');
+        renderError('Selectați o tabelă mai întâi.');
         return;
     }
 
     const endpoint = tableEndpoints[tableName];
     if (!endpoint) {
-        renderError('No backend endpoint configured for this table.');
+        renderError('Nu există endpoint în backend pentru această tabelă.');
         return;
     }
 
