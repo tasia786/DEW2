@@ -10,6 +10,7 @@ const tableEndpoints = {
     criminal_groups: 'http://localhost:8080/api/Crimes.php',
 };
 
+//mapam denumirile filtrelor din frontend la cele din backend ca sa putem face fetch ul
 const queryParamMap = {
     year: 'year',
     drug_type: 'drugType',
@@ -23,8 +24,7 @@ const queryParamMap = {
     age_category: 'ageCategory',
     article: 'article',
     sentence_type: 'sentenceType',
-    law: 'law',
-    field_name: 'field_name',
+    law: 'law'
 };
 
 const optionsEndpoints = {
@@ -39,6 +39,7 @@ const optionsEndpoints = {
     criminal_groups: 'http://localhost:8080/api/OptionsCrimes.php',
 };
 
+//coloana beneficiary este creata de noi in plus fata de csv si trb traduse valorile pe care le poate lua
 const optionTranslations = {
     beneficiary: {
         'activitati_total': 'Activități total',
@@ -51,6 +52,7 @@ const optionTranslations = {
     }
 };
 
+//numele filtrelor pt fiecare tabel
 const tableFilters = {
     seizures: [
         { name: 'year', label: 'An', type: 'select' },

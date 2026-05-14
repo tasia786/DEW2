@@ -1,17 +1,10 @@
-function escapeHtml(value) {
-    return String(value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-}
 
+//se foloseste de optionTranslations pt a afisa valorile bune pt filtrul beneficiary
 function translateOption(fieldName, value) {
     const translations = optionTranslations[fieldName];
     if (!translations) return value;
 
-    return translations[value] || translations[String(value).trim()] || value;
+    return translations[value] || value;
 }
 
 function formatHeader(header) {
@@ -36,10 +29,6 @@ function formatHeader(header) {
         law: 'Lege'
     };
 
-    return headerLabels[header] || header.replaceAll('_', ' ').replace(/\b\w/g, char => char.toUpperCase());
+    return headerLabels[header];
 }
 
-function formatResultValue(header, value) {
-    if (value === null || value === undefined) return '';
-    return translateOption(header, String(value));
-}

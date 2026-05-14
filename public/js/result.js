@@ -2,9 +2,7 @@ let currentResults = [];
 let currentTableName = '';
 let resultViewMode = 'table';
 
-/**
- * Punctul principal de intrare pentru afișarea rezultatelor.
- */
+//functia principala
 function renderResults(data, tableName) {
     const resultsContainer = document.getElementById('results-empty-state');
     if (!resultsContainer) return;
@@ -22,7 +20,7 @@ function renderResults(data, tableName) {
 
     resultsContainer.innerHTML = `
     <div class="card">
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-6); flex-wrap: wrap;">
+        <div class="card-header">
             <div class="card-title" style="margin-bottom: 0;">${data.length} rezultate</div>
             ${renderViewControls()}
         </div>
@@ -31,16 +29,24 @@ function renderResults(data, tableName) {
 `;
 }
 
-/**
- * Returnează numele coloanelor, excluzând 'id'.
- */
+//returneaza numele coloanelor, fara id
 function getResultHeaders(data) {
     return Object.keys(data[0]).filter(header => header.toLowerCase() !== 'id');
 }
 
-/**
- * Generează butoanele de comutare între modurile de vizualizare.
- */
+//in functie de ce mod de vizualizare alegem, apleam functia coresp
+function renderResultView(data, headers) {
+    if (resultViewMode === 'bar') {
+        return renderBarChartView(data, headers);
+    }
+    if (resultViewMode === 'line') {
+        return renderLineChartView(data, headers);
+    }
+    return renderTableView(data, headers);
+}
+
+
+//inseram butoanele pt vizualizare+export
 function renderViewControls() {
     const views = [
         ['table', 'Tabel'],
@@ -48,6 +54,7 @@ function renderViewControls() {
         ['line', 'Line Chart']
     ];
 
+    //butoanele de vizualizare
     let html = `
         <div style="display: flex; align-items: center; gap: var(--space-4);">
             <div style="display: flex; gap: var(--space-2);">
@@ -60,7 +67,7 @@ function renderViewControls() {
                 `).join('')}
             </div>`;
 
-    // AFIȘĂM EXPORTUL DOAR DACĂ NU SUNTEM PE TABEL
+    //butoanele de export svf,png si webP doar daca suntem pe un chart
     if (resultViewMode === 'bar' || resultViewMode === 'line') {
         html += `
             <div style="height: 20px; width: 1px; background: var(--color-border);"></div>
@@ -76,35 +83,21 @@ function renderViewControls() {
     return html;
 }
 
-/**
- * Decide ce funcție de randare să apeleze în funcție de modul selectat.
- */
-function renderResultView(data, headers) {
-    if (resultViewMode === 'bar') {
-        return renderBarChartView(data, headers);
-    }
-    if (resultViewMode === 'line') {
-        return renderLineChartView(data, headers);
-    }
-    return renderTableView(data, headers);
-}
 
-/**
- * Randarea sub formă de tabel HTML.
- */
+//afisare ca tabel
 function renderTableView(data, headers) {
     const headersHtml = headers
         .map(header => `
-        <th style="padding: var(--space-3) var(--space-4); text-align: left; font-size: var(--font-size-md); color: var(--color-text-secondary); font-weight: 600; white-space: nowrap; width: ${100 / headers.length}%;">
+        <th class="table-header">
             ${formatHeader(header)}
         </th>`)
         .join('');
 
-    const rowsHtml = data.map((item, index) => {
+    const rowsHtml = data.map((row, index) => {
         const cells = headers
             .map(header => `
-            <td style="padding: var(--space-3) var(--space-4); font-size: var(--font-size-sm); color: var(--color-text-primary); border-bottom: 1px solid var(--color-border);">
-                ${item[header]}
+            <td class="table-cell">
+                ${row[header]}
             </td>`)
             .join('');
         return `<tr style="background: ${index % 2 === 0 ? 'white' : 'var(--color-bg-hover)'};">${cells}</tr>`;
@@ -126,97 +119,7 @@ function renderTableView(data, headers) {
     `;
 }
 
-/**
- * Identifică coloana care conține date numerice (value, beneficiaries_count etc.).
- */
-function getMetricHeader(headers) {
-    if (headers.includes('value')) return 'value';
-    if (headers.includes('beneficiaries_count')) return 'beneficiaries_count';
-
-    return headers.find(header => header !== 'year' && currentResults.some(item => Number.isFinite(Number(item[header]))));
-}
-
-/**
- * Pregătește datele pentru Bar Chart (agregare Top 10).
- */
-function prepareChartData(data, headers, tableName) {
-    const metricHeader = getMetricHeader(headers);
-    let labelHeaders;
-
-    // Logica specifică pentru campanii (doar numele) vs restul tabelelor (compus)
-    if (tableName === 'campaigns_projects') {
-        labelHeaders = ['name'];
-    } else {
-        labelHeaders = headers.filter(h => h !== 'year' && h !== metricHeader);
-    }
-
-    const summary = {};
-    data.forEach(item => {
-        const compositeLabel = labelHeaders
-            .map(h => translateOption(h, item[h]))
-            .filter(Boolean)
-            .join(' · ');
-
-        const value = Number(item[metricHeader]) || 0;
-        summary[compositeLabel] = (summary[compositeLabel] || 0) + value;
-    });
-
-    const sortedLabels = Object.keys(summary)
-        .sort((a, b) => summary[b] - summary[a])
-        .slice(0, 10);
-
-    return {
-        labels: sortedLabels,
-        values: sortedLabels.map(l => summary[l]),
-        metricName: formatHeader(metricHeader)
-    };
-}
-
-
-let currentChartInstance = null; // Reper pentru graficul activ
-
-/**
- * Funcția de export actualizată pentru ApexCharts
- */
-window.downloadChart = function (format) {
-    if (!currentChartInstance) return;
-
-    // Preluăm numele tradus din select-ul de tabel
-    const tableSelect = document.getElementById('s-table');
-    const fileName = tableSelect && tableSelect.selectedIndex > 0
-        ? tableSelect.options[tableSelect.selectedIndex].text.toLowerCase().replace(/\s+/g, '_')
-        : 'grafic';
-
-    if (format === 'svg') {
-        currentChartInstance.exports.exportToSVG();
-    } else if (format === 'png') {
-        currentChartInstance.exports.exportToPng();
-    } else if (format === 'webp') {
-        // ApexCharts nu are WebP nativ, folosim metoda dataURI()
-        currentChartInstance.dataURI().then(({ imgURI }) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-                //ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0);
-
-                const link = document.createElement('a');
-                link.download = `vizualizare-${fileName}.webp`;
-                link.href = canvas.toDataURL('image/webp');
-                link.click();
-            };
-            img.src = imgURI;
-        });
-    }
-};
-
-/**
- * Randare Bar Chart Orizontal (Top 10) cu ApexCharts.
- */
+//afisare ca bar chart
 function renderBarChartView(data, headers) {
     const chartData = prepareChartData(data, headers, currentTableName);
     const chartId = 'apexBarChart';
@@ -229,18 +132,18 @@ function renderBarChartView(data, headers) {
             }],
             chart: {
                 type: 'bar',
-                height: 500, // Am mărit puțin înălțimea pentru a lăsa textele să "respire"
+                height: 500, 
                 toolbar: { show: false },
-                fontFamily: 'inherit' // Preia fontul paginii tale
+                fontFamily: 'inherit' 
             },
             dataLabels: {
-                enabled: false // Dezactivează afișarea numerelor pe bare
+                enabled: false //Dezactivează afișarea numerelor pe bare
             },
             plotOptions: {
                 bar: {
                     horizontal: true,
                     borderRadius: 4,
-                    barHeight: '70%' // Face barele puțin mai subțiri pentru a lăsa loc textului
+                    barHeight: '70%' 
                 }
             },
             colors: ['#4f46e5'],
@@ -252,13 +155,13 @@ function renderBarChartView(data, headers) {
                     show: true,
                     rotate: 0,
                     style: {
-                        fontSize: '14px',    // Text mai mare ca în Chart.js
-                        fontWeight: 600,     // Text mai clar (îngroșat)
-                        colors: ['#374151']  // Culoare gri închis pentru contrast
+                        fontSize: '14px',    
+                        fontWeight: 600,     
+                        colors: ['#374151']  
                     },
-                    maxWidth: 300,           // Permite textului să ocupe mai mult spațiu în stânga
+                    maxWidth: 300,           
                     formatter: function (value) {
-                        // Logica de tăiere exact ca în codul tău vechi de Chart.js
+                        //taiem textul daca e prea lung
                         if (typeof value === 'string' && value.length > 40) {
                             return value.substring(0, 40) + '...';
                         }
@@ -268,7 +171,7 @@ function renderBarChartView(data, headers) {
             },
             grid: {
                 padding: {
-                    left: 20 // Adaugă spațiu suplimentar în marginea din stânga
+                    left: 20 
                 }
             },
             title: {
@@ -279,9 +182,6 @@ function renderBarChartView(data, headers) {
                     fontWeight: 'bold'
                 }
             },
-            // În interiorul obiectului options din renderBarChartView
-            // În interiorul options din renderBarChartView
-            // În interiorul obiectului options din renderBarChartView
             tooltip: {
                 theme: 'light',
                 x: {
@@ -289,9 +189,8 @@ function renderBarChartView(data, headers) {
                     formatter: function (val) {
                         if (typeof val !== 'string') return val;
 
-                        // Aplicăm doar smartWrap pentru a pune textul pe mai multe rânduri 
-                        // dacă depășește un număr de caractere (ex: 35)
-                        return smartWrap(val, 35);
+                        //punem textul pe mai multe randuri daca depaseste 35 de carac
+                        return wrap(val, 35);
                     }
                 },
                 y: {
@@ -309,30 +208,67 @@ function renderBarChartView(data, headers) {
 
     return `<div id="${chartId}" style="padding: 10px; background: white;"></div>`;
 }
-/**
- * Randare Line Chart cu ApexCharts
- */
-/**
- * Randare Line Chart (Evoluție anuală) cu ApexCharts.
- */
+
+
+//pregatim datele pt grafic
+function prepareChartData(data, headers, tableName) {
+    //gasim coloana dupa care sortam (value sau benef)
+    let metricHeader = 'value';
+    if (tableName == 'campaigns_projects') metricHeader = 'beneficiaries_count';
+
+
+    //in label uri la grafic punem in general toate coloanele diferite de year si value, dar la campaigns_projects punem doar numele, pt ca e f lung
+    let labelHeaders;
+    if (tableName === 'campaigns_projects') {
+        labelHeaders = ['name'];
+    } else {
+        labelHeaders = headers.filter(h => h !== 'year' && h !== metricHeader);
+    }
+
+    //concatenam cu punct valorile coloanelor din labelHeaders si facem un dictionar
+    const summary = {};
+    data.forEach(item => {
+        const compositeLabel = labelHeaders
+            .map(h => translateOption(h, item[h]))
+            .join(' · ');
+
+        const value = Number(item[metricHeader]) || 0;
+        summary[compositeLabel] = (summary[compositeLabel] || 0) + value;
+    });
+
+
+    //sortam obiectul crescator si punem doar primele 10 valori
+    const sortedLabels = Object.keys(summary)
+        .sort((a, b) => summary[b] - summary[a])
+        .slice(0, 10);
+
+    return {
+        labels: sortedLabels,
+        values: sortedLabels.map(l => summary[l]),
+        metricName: formatHeader(metricHeader)
+    };
+}
+
+
+//afisare ca line chart
 function renderLineChartView(data, headers) {
+    //luam anii distincti si ii punem intr o lista
     const years = [...new Set(data.map(item => item.year))].sort();
-    const metricHeader = getMetricHeader(headers);
-    
+
+    let metricHeader = 'value';
+    if (currentTableName === 'campaigns_projects') metricHeader = 'beneficiaries_count';
+
+    //calculam valoarea totala pe fiecare an
     const valuesPerYear = years.map(year => {
         return data
             .filter(item => item.year === year)
-            .reduce((sum, item) => sum + (Number(item[metricHeader]) || 0), 0);
+            .reduce((sum, item) => sum + Number(item[metricHeader]), 0);
     });
 
-    const chartId = 'apexLineChart';
-    
-    // Preluăm numele tradus al tabelei pentru titlu
-    const tableSelect = document.getElementById('s-table');
-    const tableNameRo = tableSelect && tableSelect.selectedIndex > 0 
-        ? tableSelect.options[tableSelect.selectedIndex].text 
-        : 'Date';
+    const chartId = 'apexLineChart'
+    const tableNameRo = document.getElementById('s-table').selectedOptions[0].text;
 
+    
     requestAnimationFrame(() => {
         const options = {
             series: [{
@@ -341,18 +277,18 @@ function renderLineChartView(data, headers) {
             }],
             chart: {
                 type: 'line',
-                height: 450, // Mărit pentru vizibilitate
+                height: 450, 
                 toolbar: { show: false },
                 zoom: { enabled: false },
                 fontFamily: 'inherit'
             },
             stroke: {
                 curve: 'smooth',
-                width: 4 // Linie mai groasă și proeminentă
+                width: 4 
             },
             colors: ['#4f46e5'],
             markers: {
-                size: 6, // Puncte mai mari pe linie
+                size: 6, 
                 hover: { size: 8 }
             },
             title: {
@@ -389,7 +325,7 @@ function renderLineChartView(data, headers) {
                         fontWeight: 600,
                         colors: '#374151'
                     },
-                    formatter: (val) => Math.floor(val) // Evităm zecimalele dacă nu e cazul
+                    formatter: (val) => Math.floor(val) 
                 },
                 title: {
                     text: formatHeader(metricHeader),
@@ -425,7 +361,7 @@ function renderLineChartView(data, headers) {
     return `<div id="${chartId}" style="padding: 10px; background: white;"></div>`;
 }
 
-function smartWrap(text, maxChars = 30) {
+function wrap(text, maxChars) {
     if (!text || text.length <= maxChars) return text;
 
     const words = text.split(' ');
@@ -443,3 +379,43 @@ function smartWrap(text, maxChars = 30) {
     lines.push(currentLine.trim());
     return lines.join('<br>');
 }
+
+let currentChartInstance = null; 
+
+
+window.downloadChart = function (format) {
+    if (!currentChartInstance) return;
+
+    //luam numele tradus din select ul de tabel
+    const tableSelect = document.getElementById('s-table');
+
+    const fileName = document.getElementById('s-table').selectedOptions[0].text;
+
+    if (format === 'svg') {
+        currentChartInstance.exports.exportToSVG();
+    } else if (format === 'png') {
+        currentChartInstance.exports.exportToPng();
+    } else if (format === 'webp') {
+        currentChartInstance.dataURI().then(({ imgURI }) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+
+                const link = document.createElement('a');
+                link.download = `vizualizare-${fileName}.webp`;
+                link.href = canvas.toDataURL('image/webp');
+                link.click();
+            };
+            img.src = imgURI;
+        });
+    }
+};
+
+
+
+

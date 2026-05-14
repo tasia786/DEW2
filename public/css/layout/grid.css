@@ -1,6 +1,3 @@
-/* ==========================================================================
-   HEADER & NAVIGATION
-   ========================================================================== */
 
 .app-header {
   background: rgb(152, 204, 195);
@@ -9,7 +6,6 @@
   top: 0;
   z-index: 100;
   padding: 0 var(--space-4);
-  /* Padding redus pe mobil */
 }
 
 .app-nav {
@@ -17,7 +13,6 @@
   min-height: var(--header-height);
   display: flex;
   flex-direction: column;
-  /* Elemente stivuite vertical pe mobil */
   align-items: center;
   justify-content: center;
   padding: var(--space-4) 0;
@@ -34,7 +29,6 @@
   display: flex;
   gap: var(--space-2);
   flex-wrap: wrap;
-  /* Permite link-urilor să treacă pe rând nou pe ecrane mici */
   justify-content: center;
 }
 
@@ -53,14 +47,6 @@
   color: var(--color-accent-dark);
 }
 
-/* ==========================================================================
-   MAIN LAYOUT & CONTAINERS
-   ========================================================================== */
-
-
-/* ==========================================================================
-   PAGE HEADERS
-   ========================================================================== */
 
 .page-header {
   margin-bottom: var(--space-6);
@@ -78,11 +64,7 @@
   margin-top: var(--space-1);
 }
 
-/* ==========================================================================
-   RESPONSIVE ADJUSTMENTS (Desktop)
-   ========================================================================== */
 
-/* Ajustări pentru Tablete/Laptops (peste 768px) */
 @media (min-width: 768px) {
   .app-header {
     padding: 0 var(--space-10);
@@ -90,14 +72,12 @@
 
   .app-nav {
     flex-direction: row;
-    /* Navigația revine la format orizontal */
     justify-content: space-between;
     height: var(--header-height);
     padding: 0;
   }
 }
 
-/* Ajustări pentru Desktop (peste 1024px) */
 
 .app-main {
   padding: var(--space-4);
@@ -105,13 +85,10 @@
 
 .grid-2col {
   grid-template-columns: 320px 1fr;
-  /* Filtrele revin în stânga rezultatelor */
   display: grid;
   gap: var(--space-6);
   align-items: start;
 }
-
-
 
 .container {
   max-width: var(--content-max);
@@ -124,11 +101,6 @@
     gap: var(--space-6);
   }
 }
-
-
-/* ==========================================================================
-   SAFETY RESETS
-   ========================================================================== */
 
 img,
 table,
