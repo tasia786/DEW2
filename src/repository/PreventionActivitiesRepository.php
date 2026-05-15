@@ -3,6 +3,7 @@ require_once __DIR__ . '/RepositoryInterface.php';
 require_once __DIR__ . '/../util/appendInQuery.php';
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../model/PreventionActivity.php';
+require_once __DIR__ . '/../dtos/SearchRequestPrevention.php';
 
 class PreventionActivitiesRepository implements RepositoryInterface
 {
@@ -53,5 +54,35 @@ class PreventionActivitiesRepository implements RepositoryInterface
         );
         $stmt->execute();
         return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), $columnName);
+    }
+
+    public function search(SearchRequestPrevention $searchRequest): array
+    {
+        $values = [];
+        $dbColumnNames = [];
+
+        if ($searchRequest->getYears() !== null) {
+            $values[] = $searchRequest->getYears();
+            $dbColumnNames[] = 'year';
+        }
+
+        if ($searchRequest->getEnvironment() !== null) {
+            $values[] = $searchRequest->getEnvironment();
+            $dbColumnNames[] = 'environment';
+        }
+
+        if ($searchRequest->getBeneficiary() !== null) {
+            $values[] = $searchRequest->getBeneficiary();
+            $dbColumnNames[] = 'beneficiary';
+        }
+
+        $params = [];
+        $query  = appendInQuery2($values, $dbColumnNames, 'prevention_activities', $params, $searchRequest->getNmbPage());
+
+        $db   = Database::getConnection();
+        $stmt = $db->prepare($query);
+        $stmt->execute($params);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return PreventionActivity::fromArrayToObjsSet($result);
     }
 }

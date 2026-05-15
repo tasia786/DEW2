@@ -4,6 +4,10 @@ require_once __DIR__ . '/../repository/PreventionActivitiesRepository.php';
 require_once __DIR__ . '/../util/Response.php';
 require_once __DIR__ . '/../util/Validator.php';
 require_once __DIR__ . '/../config/Constant.php';
+require_once __DIR__ . '/../dtos/SearchRequestCampaign.php';
+require_once __DIR__ . '/..//util/dtoValidators/SearchRequestCampaignValidator.php';
+require_once __DIR__ . '/../dtos/SearchRequestPrevention.php';
+require_once __DIR__ . '/..//util/dtoValidators/SearcRequestPreventionValidator.php';
 
 class CampaignController
 {
@@ -25,57 +29,41 @@ class CampaignController
             return;
         }
 
-        $values = [];
-        $columnNames = [];
-
-        if (isset($_GET['year']) && !empty($_GET['year'])) {
-            if (!Validator::validInt($_GET['year'], MIN_YEAR, MAX_YEAR)) {
-                Response::badRequest('Invalid year');
+        if ($_GET['activity'] === 'project') {
+            $responseRequest = parseSearchRequestCampaign($_GET);
+            if (!$responseRequest['isSuccess']) {
+                Response::badRequest($responseRequest['message']);
                 return;
             }
-            array_push($values, $_GET['year']);
-            array_push($columnNames, 'year');
-        }
 
-        if ($_GET['activity'] === 'project') {
-            if (isset($_GET['type']) && !empty($_GET['type'])) {
-                if (!Validator::validString($_GET['type'], ['campanie', 'proiect'])) {
-                    Response::badRequest('Invalid type; accepted: campanie, proiect');
-                    return;
-                }
-                array_push($values, $_GET['type']);
-                array_push($columnNames, 'type');
+            $request = $responseRequest['object'];
+            $validationResult = SearchRequestCampaignValidator::validate($request);
+            if (!$validationResult['isSuccess']) {
+                Response::badRequest($validationResult['message']);
+                return;
             }
-            $data = $this->campaignProjectRepo->selectWithFilter($values, $columnNames);
-            $result = array_map(fn($c) => $c->toArray(), $data);
-        } else {
-            if (isset($_GET['environment']) && !empty($_GET['environment'])) {
-                array_push($values, $_GET['environment']);
-                array_push($columnNames, 'environment');
-            }
-
-            if (isset($_GET['beneficiary']) && !empty($_GET['beneficiary'])) {
-                if (!Validator::validString($_GET['beneficiary'], [
-                    'activitati_total',
-                    'copii',
-                    'parinti',
-                    'cadre_didactice',
-                    'studenti',
-                    'persoane',
-                    'elevi'
-                ])) {
-                    Response::badRequest('Invalid beneficiary type; alowwed: activitati_total, copii, parinti, cadre_didactice, studenti, persoane, elevi');
-                    return;
-                }
-                array_push($values, $_GET['beneficiary']);
-                array_push($columnNames, 'beneficiary');
-            }
-
-            $data = $this->preventionActivitiesRepo->selectWithFilter($values, $columnNames);
+            $data = $this->campaignProjectRepo->search($request);
             $result = array_map(fn($p) => $p->toArray(), $data);
-        }
 
-        Response::sendData($result);
+            Response::sendData($result);
+        } else {
+            $responseRequest = parseSearchRequestPrevention($_GET);
+            if (!$responseRequest['isSuccess']) {
+                Response::badRequest($responseRequest['message']);
+                return;
+            }
+
+            $request = $responseRequest['object'];
+            $validationResult = SearchRequestPreventionValidator::validate($request);
+            if (!$validationResult['isSuccess']) {
+                Response::badRequest($validationResult['message']);
+                return;
+            }
+            $data = $this->preventionActivitiesRepo->search($request);
+            $result = array_map(fn($p) => $p->toArray(), $data);
+
+            Response::sendData($result);
+        }
     }
 
     public function selectOptions(): void
