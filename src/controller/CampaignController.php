@@ -7,7 +7,7 @@ require_once __DIR__ . '/../config/Constant.php';
 require_once __DIR__ . '/../dtos/SearchRequestCampaign.php';
 require_once __DIR__ . '/..//util/dtoValidators/SearchRequestCampaignValidator.php';
 require_once __DIR__ . '/../dtos/SearchRequestPrevention.php';
-require_once __DIR__ . '/..//util/dtoValidators/SearcRequestPreventionValidator.php';
+require_once __DIR__ . '/..//util/dtoValidators/SearchRequestPreventionValidator.php';
 
 class CampaignController
 {
