@@ -3,6 +3,7 @@ require_once __DIR__ . '/RepositoryInterface.php';
 require_once __DIR__ . '/../util/appendInQuery.php';
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../model/Seizure.php';
+require_once __DIR__ . '/../dtos/SearchRequestSeizure.php';
 
 class SeizuresRepository implements RepositoryInterface
 {
@@ -53,5 +54,36 @@ class SeizuresRepository implements RepositoryInterface
         );
         $stmt->execute();
         return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), $columnName);
+    }
+
+    public function search(SearchRequestSeizure $searchRequest): array
+    {
+        $values = [];
+        $dbColumnNames = [];
+
+        if ($searchRequest->getYears() !== null) {
+            $values[] = $searchRequest->getYears();
+            $dbColumnNames[] = 'year';
+        }
+
+        if ($searchRequest->getDrugType() !== null) {
+            $values[] = $searchRequest->getDrugType();
+            $dbColumnNames[] = 'drug_type';
+        }
+
+        if ($searchRequest->getSeizureType() !== null) {
+            $values[] = $searchRequest->getSeizureType();
+            $dbColumnNames[] = 'seizure_type';
+        }
+
+        $params = [];
+        $query = appendInQuery2($values, $dbColumnNames, 'seizures', $params, $searchRequest->getNmbPage());
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare($query);
+        $stmt->execute($params);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return Seizure::fromArrayToObjSet($result);
     }
 }
