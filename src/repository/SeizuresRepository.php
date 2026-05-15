@@ -4,6 +4,7 @@ require_once __DIR__ . '/../util/appendInQuery.php';
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../model/Seizure.php';
 require_once __DIR__ . '/../dtos/SearchRequestSeizure.php';
+require_once __DIR__ . '/../dtos/Id.php';
 
 class SeizuresRepository implements RepositoryInterface
 {
@@ -85,5 +86,14 @@ class SeizuresRepository implements RepositoryInterface
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return Seizure::fromArrayToObjSet($result);
+    }
+
+    public function delete(Id $id) : bool
+    {
+        $db   = Database::getConnection();
+        $stmt = $db->prepare("DELETE FROM seizures WHERE id = ?");
+        $stmt->execute([$id->getId()]);
+
+        return $stmt->rowCount() > 0;
     }
 }

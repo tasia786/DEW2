@@ -4,6 +4,7 @@ require_once __DIR__ . '/../repository/PreventionActivitiesRepository.php';
 require_once __DIR__ . '/../util/Response.php';
 require_once __DIR__ . '/../util/Validator.php';
 require_once __DIR__ . '/../config/Constant.php';
+require_once __DIR__ . '/../dtos/Id.php';
 require_once __DIR__ . '/../dtos/SearchRequestCampaign.php';
 require_once __DIR__ . '/..//util/dtoValidators/SearchRequestCampaignValidator.php';
 require_once __DIR__ . '/../dtos/SearchRequestPrevention.php';
@@ -90,6 +91,32 @@ class CampaignController
                 return;
             }
             Response::json($this->preventionActivitiesRepo->selectDistinct($_GET['column']));
+        }
+    }
+
+    public function delete(): void
+    {
+        if (!isset($_GET['activity']) || empty($_GET['activity']) || !in_array($_GET['activity'], ['prevention', 'project'], true)) {
+            Response::badRequest('activity is required; accepted: prevention, project');
+            return;
+        }
+
+        $responseRequest = parseId($_GET);
+        if (!$responseRequest['isSuccess']) {
+            Response::badRequest($responseRequest['message']);
+            return;
+        }
+
+        $request = $responseRequest['object'];
+        if ($_GET['activity'] === 'project') {
+            $isDeleted = $this->campaignProjectRepo->delete($request);
+        } else {
+            $isDeleted = $this->preventionActivitiesRepo->delete($request);
+        }
+        if ($isDeleted) {
+            Response::json(array('message' => 'deleted'));
+        } else {
+            Response::json(array('message' => 'id does not exist'));
         }
     }
 }

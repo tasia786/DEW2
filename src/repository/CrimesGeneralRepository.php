@@ -80,4 +80,13 @@ class CrimesGeneralRepository implements RepositoryInterface
 
         return CrimeGeneral::fromArrayToObjsSet($result);
     }
+
+    public function delete(Id $id): bool
+    {
+        $db   = Database::getConnection();
+        $stmt = $db->prepare("DELETE FROM crimes_general WHERE id = ?");
+        $stmt->execute([$id->getId()]);
+
+        return $stmt->rowCount() > 0;
+    }
 }

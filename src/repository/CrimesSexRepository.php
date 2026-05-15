@@ -86,4 +86,13 @@ class CrimesSexRepository implements RepositoryInterface
 
         return CrimeSex::fromArrayToObjsSet($result);
     }
+
+    public function delete(Id $id): bool
+    {
+        $db   = Database::getConnection();
+        $stmt = $db->prepare("DELETE FROM crimes_sex WHERE id = ?");
+        $stmt->execute([$id->getId()]);
+
+        return $stmt->rowCount() > 0;
+    }
 }

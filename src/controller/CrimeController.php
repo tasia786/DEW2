@@ -6,6 +6,7 @@ require_once __DIR__ . '/../repository/CrimesSentencesRepository.php';
 require_once __DIR__ . '/../repository/CriminalGroupsRepository.php';
 require_once __DIR__ . '/../util/Response.php';
 require_once __DIR__ . '/../util/Validator.php';
+require_once __DIR__ . '/../dtos/Id.php';
 require_once __DIR__ . '/../config/Constant.php';
 require_once __DIR__ . '/../dtos/SearchRequestCrimeGeneral.php';
 require_once __DIR__ . '/../dtos/SearchRequestCrimeSex.php';
@@ -109,6 +110,35 @@ class CrimesController
         };
 
         Response::json($data);
+    }
+
+    public function delete(): void
+    {
+        if (!isset($_GET['type']) || empty($_GET['type']) || !in_array($_GET['type'], ['general', 'sex', 'law', 'sentences', 'groups'], true)) {
+            Response::badRequest('type is required; accepted: general, sex, law, sentences, groups');
+            return;
+        }
+
+        $responseRequest = parseId($_GET);
+        if (!$responseRequest['isSuccess']) {
+            Response::badRequest($responseRequest['message']);
+            return;
+        }
+
+        $request = $responseRequest['object'];
+        $isDeleted = match ($_GET['type']) {
+            'general'   => $this->generalRepo->delete($request),
+            'sex'       => $this->sexRepo->delete($request),
+            'law'       => $this->lawRepo->delete($request),
+            'sentences' => $this->sentencesRepo->delete($request),
+            'groups'    => $this->groupsRepo->delete($request),
+        };
+
+        if ($isDeleted) {
+            Response::json(array('message' => 'deleted'));
+        } else {
+            Response::json(array('message' => 'id does not exist'));
+        }
     }
 
     private function searchGeneral(): array

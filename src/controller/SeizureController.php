@@ -4,6 +4,7 @@ require_once __DIR__ . '/../util/Response.php';
 require_once __DIR__ . '/../util/Validator.php';
 require_once __DIR__ . '/../config/Constant.php';
 require_once __DIR__ . '/../dtos/SearchRequestSeizure.php';
+require_once __DIR__ . '/../dtos/Id.php';
 require_once __DIR__ . '/../util/dtoValidators/SearchRequestSeizureValidation.php';
 
 class SeizuresController
@@ -47,5 +48,22 @@ class SeizuresController
             return;
         }
         Response::json($this->repo->selectDistinct($_GET['column']));
+    }
+
+    public function delete(): void
+    {
+        $responseRequest = parseId($_GET);
+        if (!$responseRequest['isSuccess']) {
+            Response::badRequest($responseRequest['message']);
+            return;
+        }
+
+        $request = $responseRequest['object'];
+        $isDeleted = $this->repo->delete($request);
+        if ($isDeleted) {
+            Response::json(array('message' => 'deleted'));
+        } else {
+            Response::json(array('message' => 'id does not exist'));
+        }
     }
 }

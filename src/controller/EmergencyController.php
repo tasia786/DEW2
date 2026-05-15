@@ -4,6 +4,7 @@ require_once __DIR__ . '/../util/Response.php';
 require_once __DIR__ . '/../util/Validator.php';
 require_once __DIR__ . '/../config/Constant.php';
 require_once __DIR__ . '/../dtos/SearchRequestEmergency.php';
+require_once __DIR__ . '/../dtos/Id.php';
 require_once __DIR__ . '/../util/dtoValidators/SearchRequestEmergencyValidation.php';
 
 class EmergencyController
@@ -47,5 +48,22 @@ class EmergencyController
             return;
         }
         Response::json($this->emergencyRepo->selectDistinct($_GET['column']));
+    }
+
+    public function delete(): void
+    {
+        $responseRequest = parseId($_GET);
+        if (!$responseRequest['isSuccess']) {
+            Response::badRequest($responseRequest['message']);
+            return;
+        }
+
+        $request = $responseRequest['object'];
+        $isDeleted = $this->emergencyRepo->delete($request);
+        if ($isDeleted) {
+            Response::json(array('message' => 'deleted'));
+        } else {
+            Response::json(array('message' => 'id does not exist'));
+        }
     }
 }

@@ -61,12 +61,12 @@ class CampaignsProjectsRepository implements RepositoryInterface
         $dbColumnNames = [];
 
         if ($searchRequest->getYears() !== null) {
-            $values[] = $searchRequest->getYears(); 
+            $values[] = $searchRequest->getYears();
             $dbColumnNames[] = 'year';
         }
 
         if ($searchRequest->getType() !== null) {
-            $values[] = $searchRequest->getType(); 
+            $values[] = $searchRequest->getType();
             $dbColumnNames[] = 'type';
         }
 
@@ -79,6 +79,13 @@ class CampaignsProjectsRepository implements RepositoryInterface
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return CampaignProject::fromArrayToObjsSet($result);
     }
-}
 
-//var_dump(new CampaignsProjectsRepository()->search(new SearchRequestCampaign(null, null, 1)));
+    public function delete(Id $id): bool
+    {
+        $db   = Database::getConnection();
+        $stmt = $db->prepare("DELETE FROM campaigns_projects WHERE id = ?");
+        $stmt->execute([$id->getId()]);
+
+        return $stmt->rowCount() > 0;
+    }
+}
