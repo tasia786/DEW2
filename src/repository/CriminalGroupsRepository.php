@@ -3,6 +3,7 @@ require_once __DIR__ . '/RepositoryInterface.php';
 require_once __DIR__ . '/../util/appendInQuery.php';
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../model/CriminalGroup.php';
+require_once __DIR__ . '/../dtos/SearchRequestCriminalGroup.php';
 
 class CriminalGroupsRepository implements RepositoryInterface
 {
@@ -51,5 +52,31 @@ class CriminalGroupsRepository implements RepositoryInterface
         );
         $stmt->execute();
         return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), $columnName);
+    }
+
+    public function search(SearchRequestCriminalGroup $searchRequest): array
+    {
+        $values = [];
+        $dbColumnNames = [];
+
+        if ($searchRequest->getYears() !== null) {
+            $values[] = $searchRequest->getYears();
+            $dbColumnNames[] = 'year';
+        }
+
+        if ($searchRequest->getFieldName() !== null) {
+            $values[] = $searchRequest->getFieldName();
+            $dbColumnNames[] = 'field_name';
+        }
+
+        $params = [];
+        $query = appendInQuery2($values, $dbColumnNames, 'criminal_groups', $params, $searchRequest->getNmbPage());
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare($query);
+        $stmt->execute($params);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return CriminalGroup::fromArrayToObjsSet($result);
     }
 }

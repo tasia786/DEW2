@@ -7,6 +7,16 @@ require_once __DIR__ . '/../repository/CriminalGroupsRepository.php';
 require_once __DIR__ . '/../util/Response.php';
 require_once __DIR__ . '/../util/Validator.php';
 require_once __DIR__ . '/../config/Constant.php';
+require_once __DIR__ . '/../dtos/SearchRequestCrimeGeneral.php';
+require_once __DIR__ . '/../dtos/SearchRequestCrimeSex.php';
+require_once __DIR__ . '/../dtos/SearchRequestCrimeLaw.php';
+require_once __DIR__ . '/../dtos/SearchRequestCrimeSentence.php';
+require_once __DIR__ . '/../dtos/SearchRequestCriminalGroup.php';
+require_once __DIR__ . '/../util/dtoValidators/SearchRequestCrimeGeneralValidation.php';
+require_once __DIR__ . '/../util/dtoValidators/SearchRequestCrimeSexValidation.php';
+require_once __DIR__ . '/../util/dtoValidators/SearchRequestCrimeLawValidation.php';
+require_once __DIR__ . '/../util/dtoValidators/SearchRequestCrimeSentenceValidation.php';
+require_once __DIR__ . '/../util/dtoValidators/SearchRequestCriminalGroupValidation.php';
 
 class CrimesController
 {
@@ -32,24 +42,12 @@ class CrimesController
             return;
         }
 
-        $values      = [];
-        $columnNames = [];
-
-        if (isset($_GET['year']) && !empty($_GET['year'])) {
-            if (!Validator::validInt($_GET['year'], MIN_YEAR, MAX_YEAR)) {
-                Response::badRequest('Invalid year');
-                return;
-            }
-            array_push($values, $_GET['year']);
-            array_push($columnNames, 'year');
-        }
-
         $data = match ($_GET['type']) {
-            'general'   => $this->handleGeneral($values, $columnNames),
-            'sex'       => $this->handleSex($values, $columnNames),
-            'law'       => $this->handleLaw($values, $columnNames),
-            'sentences' => $this->handleSentences($values, $columnNames),
-            'groups'    => $this->groupsRepo->selectWithFilter($values, $columnNames),
+            'general'   => $this->searchGeneral(),
+            'sex'       => $this->searchSex(),
+            'law'       => $this->searchLaw(),
+            'sentences' => $this->searchSentences(),
+            'groups'    => $this->searchGroups(),
         };
 
         $result = array_map(fn($item) => $item->toArray(), $data);
@@ -113,60 +111,93 @@ class CrimesController
         Response::json($data);
     }
 
-    private function handleGeneral(array $values, array $columnNames): array
+    private function searchGeneral(): array
     {
-        if (isset($_GET['category']) && !empty($_GET['category'])) {
-            array_push($values, $_GET['category']);
-            array_push($columnNames, 'category');
+        $responseRequest = parseSearchRequestCrimeGeneral($_GET);
+        if (!$responseRequest['isSuccess']) {
+            Response::badRequest($responseRequest['message']);
+            exit;
         }
-        return $this->generalRepo->selectWithFilter($values, $columnNames);
+
+        $request = $responseRequest['object'];
+        $validationResult = SearchRequestCrimeGeneralValidator::validate($request);
+        if (!$validationResult['isSuccess']) {
+            Response::badRequest($validationResult['message']);
+            exit;
+        }
+
+        return $this->generalRepo->search($request);
     }
 
-    private function handleSex(array $values, array $columnNames): array
+    private function searchSex(): array
     {
-        if (isset($_GET['sex']) && !empty($_GET['sex'])) {
-            if (!Validator::validString($_GET['sex'], ['Bărbați', 'Femei'])) {
-                Response::badRequest('Invalid sex; accepted: Bărbați, Femei');
-                exit;
-            }
-            array_push($values, $_GET['sex']);
-            array_push($columnNames, 'sex');
+        $responseRequest = parseSearchRequestCrimeSex($_GET);
+        if (!$responseRequest['isSuccess']) {
+            Response::badRequest($responseRequest['message']);
+            exit;
         }
-        if (isset($_GET['ageCategory']) && !empty($_GET['ageCategory'])) {
-            if (!Validator::validString($_GET['ageCategory'], ['Majori', 'Minori'])) {
-                Response::badRequest('Invalid age category; accepted: Majori, Minori');
-                exit;
-            }
-            array_push($values, $_GET['ageCategory']);
-            array_push($columnNames, 'age_category');
+
+        $request = $responseRequest['object'];
+        $validationResult = SearchRequestCrimeSexValidator::validate($request);
+        if (!$validationResult['isSuccess']) {
+            Response::badRequest($validationResult['message']);
+            exit;
         }
-        return $this->sexRepo->selectWithFilter($values, $columnNames);
+
+        return $this->sexRepo->search($request);
     }
 
-    private function handleSentences(array $values, array $columnNames): array
+    private function searchSentences(): array
     {
-        if (isset($_GET['law']) && !empty($_GET['law'])) {
-            if (!Validator::validString($_GET['law'], ['Legea 143/2000', 'Legea 194/2011'])) {
-                Response::badRequest('Invalid law; accepted: Legea 143/2000,Legea 194/2011');
-                exit;
-            }
-            array_push($values, $_GET['law']);
-            array_push($columnNames, 'law');
+        $responseRequest = parseSearchRequestCrimeSentence($_GET);
+        if (!$responseRequest['isSuccess']) {
+            Response::badRequest($responseRequest['message']);
+            exit;
         }
 
-        if (isset($_GET['sentenceType']) && !empty($_GET['sentenceType'])) {
-            array_push($values, $_GET['sentenceType']);
-            array_push($columnNames, 'sentence_type');
+        $request = $responseRequest['object'];
+        $validationResult = SearchRequestCrimeSentenceValidator::validate($request);
+        if (!$validationResult['isSuccess']) {
+            Response::badRequest($validationResult['message']);
+            exit;
         }
-        return $this->sentencesRepo->selectWithFilter($values, $columnNames);
+
+        return $this->sentencesRepo->search($request);
     }
 
-    private function handleLaw(array $values, array $columnNames): array
+    private function searchLaw(): array
     {
-        if (isset($_GET['article']) && !empty($_GET['article'])) {
-            array_push($values, $_GET['article']);
-            array_push($columnNames, 'article');
+        $responseRequest = parseSearchRequestCrimeLaw($_GET);
+        if (!$responseRequest['isSuccess']) {
+            Response::badRequest($responseRequest['message']);
+            exit;
         }
-        return $this->lawRepo->selectWithFilter($values, $columnNames);
+
+        $request = $responseRequest['object'];
+        $validationResult = SearchRequestCrimeLawValidator::validate($request);
+        if (!$validationResult['isSuccess']) {
+            Response::badRequest($validationResult['message']);
+            exit;
+        }
+
+        return $this->lawRepo->search($request);
+    }
+
+    private function searchGroups(): array
+    {
+        $responseRequest = parseSearchRequestCriminalGroup($_GET);
+        if (!$responseRequest['isSuccess']) {
+            Response::badRequest($responseRequest['message']);
+            exit;
+        }
+
+        $request = $responseRequest['object'];
+        $validationResult = SearchRequestCriminalGroupValidator::validate($request);
+        if (!$validationResult['isSuccess']) {
+            Response::badRequest($validationResult['message']);
+            exit;
+        }
+
+        return $this->groupsRepo->search($request);
     }
 }
