@@ -21,6 +21,14 @@ require_once __DIR__ . '/../util/dtoValidators/SearchRequestCriminalGroupValidat
 
 class CrimesController
 {
+    private const TABLE_TYPES = [
+        'crimes-general'    => 'general',
+        'crimes-sex'        => 'sex',
+        'crimes-law'        => 'law',
+        'crimes-sentences'  => 'sentences',
+        'criminal-groups'   => 'groups',
+    ];
+
     private CrimesGeneralRepository   $generalRepo;
     private CrimesSexRepository       $sexRepo;
     private CrimesLawRepository       $lawRepo;
@@ -36,14 +44,16 @@ class CrimesController
         $this->groupsRepo    = new CriminalGroupsRepository();
     }
 
-    public function executeFilter(): void
+    public function executeFilter(string $table): void
     {
-        if (!isset($_GET['type']) || empty($_GET['type']) || !in_array($_GET['type'], ['general', 'sex', 'law', 'sentences', 'groups'], true)) {
-            Response::badRequest('type is required; accepted: general, sex, law, sentences, groups');
+        $key = strtolower(trim($table));
+        if(!isset(self::TABLE_TYPES[$key])){
+            Response::badRequest("wrong table");
             return;
         }
+        $type=self::TABLE_TYPES[$key];
 
-        $data = match ($_GET['type']) {
+        $data = match ($type) {
             'general'   => $this->searchGeneral(),
             'sex'       => $this->searchSex(),
             'law'       => $this->searchLaw(),
@@ -55,19 +65,21 @@ class CrimesController
         Response::sendData($result);
     }
 
-    public function selectOptions(): void
+    public function selectOptions(?string $table = null): void
     {
-        if (!isset($_GET['type']) || empty($_GET['type']) || !in_array($_GET['type'], ['general', 'sex', 'law', 'sentences', 'groups'], true)) {
-            Response::badRequest('type is required; accepted: general, sex, law, sentences, groups');
+        $key = strtolower(trim($table));
+        if(!isset(self::TABLE_TYPES[$key])){
+            Response::badRequest("wrong table");
             return;
         }
+        $type=self::TABLE_TYPES[$key];
 
         if (!isset($_GET['column']) || empty($_GET['column'])) {
             Response::badRequest("column must be specified");
             return;
         }
 
-        switch ($_GET['type']) {
+        switch ($type) {
             case 'general':
                 if (!Validator::validString($_GET['column'], ['id', 'year', 'category', 'value'])) {
                     Response::badRequest('Invalid column, accepted: id, year, category, value');
@@ -101,7 +113,7 @@ class CrimesController
         }
 
 
-        $data = match ($_GET['type']) {
+        $data = match ($type) {
             'general'   => $this->generalRepo->selectDistinct($_GET['column']),
             'sex'       => $this->sexRepo->selectDistinct($_GET['column']),
             'law'       => $this->lawRepo->selectDistinct($_GET['column']),
@@ -112,21 +124,23 @@ class CrimesController
         Response::json($data);
     }
 
-    public function delete(): void
+    public function delete(string $table, ?string $id = null): void
     {
-        if (!isset($_GET['type']) || empty($_GET['type']) || !in_array($_GET['type'], ['general', 'sex', 'law', 'sentences', 'groups'], true)) {
-            Response::badRequest('type is required; accepted: general, sex, law, sentences, groups');
+        $key = strtolower(trim($table));
+        if(!isset(self::TABLE_TYPES[$key])){
+            Response::badRequest("wrong table");
             return;
         }
+        $type=self::TABLE_TYPES[$key];
 
-        $responseRequest = parseId($_GET);
+        $responseRequest = parseId($id);
         if (!$responseRequest['isSuccess']) {
             Response::badRequest($responseRequest['message']);
             return;
         }
 
         $request = $responseRequest['object'];
-        $isDeleted = match ($_GET['type']) {
+        $isDeleted = match ($type) {
             'general'   => $this->generalRepo->delete($request),
             'sex'       => $this->sexRepo->delete($request),
             'law'       => $this->lawRepo->delete($request),

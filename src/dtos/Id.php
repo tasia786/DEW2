@@ -14,15 +14,16 @@ class Id
     }
 }
 
-function parseId(array $data): array
+function parseId(?string $id): array
 {
-    if (!isset($data['id']) || trim($data['id']) === '') {
+    if ($id === null || trim($id) === '') {
         return ['isSuccess' => false, 'message' => 'id is required'];
     }
-    if (!ctype_digit(trim($data['id']))) {
+
+    if (!ctype_digit(trim($id))) {
         return ['isSuccess' => false, 'message' => 'invalid id format'];
     } else {
-        $id = (int) $data['id'];
+        $id = (int) $id;
         return array('isSuccess' => true, 'object' => new Id($id));
     }
 }

@@ -50,9 +50,9 @@ class EmergencyController
         Response::json($this->emergencyRepo->selectDistinct($_GET['column']));
     }
 
-    public function delete(): void
+    public function delete(string|null $id = null): void
     {
-        $responseRequest = parseId($_GET);
+        $responseRequest = parseId($id);
         if (!$responseRequest['isSuccess']) {
             Response::badRequest($responseRequest['message']);
             return;

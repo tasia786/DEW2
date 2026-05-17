@@ -12,6 +12,11 @@ require_once __DIR__ . '/..//util/dtoValidators/SearchRequestPreventionValidator
 
 class CampaignController
 {
+    private const TABLE_ACTIVITIES = [
+        'campaigns-projects'     => 'project',
+        'prevention-activities'  => 'prevention',
+    ];
+
     private CampaignsProjectsRepository  $campaignProjectRepo;
     private PreventionActivitiesRepository $preventionActivitiesRepo;
 
@@ -21,16 +26,16 @@ class CampaignController
         $this->preventionActivitiesRepo = new PreventionActivitiesRepository();
     }
 
-    public function executeFilter(): void
+    public function executeFilter(string $table): void
     {
-        //project = campanie/proiect
-        //prevention = activitati de prevenire
-        if (!isset($_GET['activity']) || empty($_GET['activity']) || !in_array($_GET['activity'], ['prevention', 'project'], true)) {
-            Response::badRequest('activity is required; accepted: prevention, project');
+        $key = strtolower(trim($table));
+        if(!isset(self::TABLE_ACTIVITIES[$key])){
+            Response::badRequest("wrong table");
             return;
         }
-
-        if ($_GET['activity'] === 'project') {
+        $activity=self::TABLE_ACTIVITIES[$key];
+ 
+        if ($activity === 'project') {
             $responseRequest = parseSearchRequestCampaign($_GET);
             if (!$responseRequest['isSuccess']) {
                 Response::badRequest($responseRequest['message']);
@@ -67,19 +72,21 @@ class CampaignController
         }
     }
 
-    public function selectOptions(): void
+    public function selectOptions(string $table): void
     {
-        if (!isset($_GET['activity']) || empty($_GET['activity']) || !in_array($_GET['activity'], ['prevention', 'project'], true)) {
-            Response::badRequest('activity is required; accepted: prevention, project');
+        $key = strtolower(trim($table));
+        if(!isset(self::TABLE_ACTIVITIES[$key])){
+            Response::badRequest("wrong table");
             return;
         }
+        $activity=self::TABLE_ACTIVITIES[$key];
 
         if (!isset($_GET['column']) || empty($_GET['column'])) {
             Response::badRequest("column must be specified");
             return;
         }
 
-        if ($_GET['activity'] === 'project') {
+        if ($activity === 'project') {
             if (!Validator::validString($_GET['column'], ['id', 'year', 'type', 'name', 'value'])) {
                 Response::badRequest('Invalid column; accepted: id, year, type, name, value');
                 return;
@@ -94,21 +101,23 @@ class CampaignController
         }
     }
 
-    public function delete(): void
+    public function delete(string $table, ?string $id = null): void
     {
-        if (!isset($_GET['activity']) || empty($_GET['activity']) || !in_array($_GET['activity'], ['prevention', 'project'], true)) {
-            Response::badRequest('activity is required; accepted: prevention, project');
+        $key = strtolower(trim($table));
+        if(!isset(self::TABLE_ACTIVITIES[$key])){
+            Response::badRequest("wrong table");
             return;
         }
+        $activity=self::TABLE_ACTIVITIES[$key];
 
-        $responseRequest = parseId($_GET);
+        $responseRequest = parseId($id);
         if (!$responseRequest['isSuccess']) {
             Response::badRequest($responseRequest['message']);
             return;
         }
 
         $request = $responseRequest['object'];
-        if ($_GET['activity'] === 'project') {
+        if ($activity === 'project') {
             $isDeleted = $this->campaignProjectRepo->delete($request);
         } else {
             $isDeleted = $this->preventionActivitiesRepo->delete($request);
