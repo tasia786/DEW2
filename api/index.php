@@ -46,6 +46,9 @@ match ($_SERVER['REQUEST_METHOD']) {
     'DELETE' => $id !== null
         ? deleteResource($controller, $resource, $id)
         : Response::badRequest('id is required in the path; expected api/name-of-table/id'),
+    'PATCH' => $id !== null
+        ? patchResource($controller, $resource, $id)
+        : Response::badRequest('id is required in the path; expected api/name-of-table/id'),
     default => Response::json(['error' => 'Method not allowed'], 405),
 };
 
@@ -68,6 +71,13 @@ function deleteResource(object $controller, ?string $resource, string $id): void
     $resource === null
         ? $controller->delete($id)
         : $controller->delete($resource, $id);
+}
+
+function patchResource(object $controller, ?string $resource, string $id): void
+{
+    $resource === null
+        ? $controller->patch($id)
+        : $controller->patch($resource, $id);
 }
 
 function routeSegments(): array

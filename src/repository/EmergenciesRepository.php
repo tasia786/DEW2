@@ -4,6 +4,7 @@ require_once __DIR__ . '/../util/appendInQuery.php';
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../model/Emergency.php';
 require_once __DIR__ . '/../dtos/SearchRequestEmergency.php';
+require_once __DIR__ . '/../dtos/patchDtos/PatchRequestEmergency.php';
 
 class EmergenciesRepository implements RepositoryInterface
 {
@@ -89,9 +90,43 @@ class EmergenciesRepository implements RepositoryInterface
 
     public function delete(Id $id): bool
     {
-        $db   = Database::getConnection();
+        $db = Database::getConnection();
         $stmt = $db->prepare("DELETE FROM emergencies WHERE id = ?");
         $stmt->execute([$id->getId()]);
+
+        return $stmt->rowCount() > 0;
+    }
+
+    public function patch(PatchRequestEmergency $patchRequest): bool
+    {
+        $fields = [];
+        $params = [];
+
+        if ($patchRequest->getYear() !== null) {
+            $fields[] = 'year = ?';
+            $params[] = $patchRequest->getYear();
+        }
+        if ($patchRequest->getCriterionValue() !== null) {
+            $fields[] = 'criterion_value = ?';
+            $params[] = $patchRequest->getCriterionValue();
+        }
+        if ($patchRequest->getDrug() !== null) {
+            $fields[] = 'drug = ?';
+            $params[] = $patchRequest->getDrug();
+        }
+        if ($patchRequest->getValue() !== null) {
+            $fields[] = 'value = ?';
+            $params[] = $patchRequest->getValue();
+        }
+
+        if (empty($fields)) return false;
+
+        $params[] = $patchRequest->getId();
+        $sql = 'UPDATE emergencies SET ' . implode(', ', $fields) . ' WHERE id = ?';
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
 
         return $stmt->rowCount() > 0;
     }

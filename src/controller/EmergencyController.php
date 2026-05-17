@@ -6,6 +6,7 @@ require_once __DIR__ . '/../config/Constant.php';
 require_once __DIR__ . '/../dtos/SearchRequestEmergency.php';
 require_once __DIR__ . '/../dtos/Id.php';
 require_once __DIR__ . '/../util/dtoValidators/SearchRequestEmergencyValidation.php';
+require_once __DIR__ . '/../dtos/patchDtos/PatchRequestEmergency.php';
 
 class EmergencyController
 {
@@ -62,6 +63,34 @@ class EmergencyController
         $isDeleted = $this->emergencyRepo->delete($request);
         if ($isDeleted) {
             Response::json(array('message' => 'deleted'));
+        } else {
+            Response::json(array('message' => 'id does not exist'));
+        }
+    }
+
+    public function patch(string $id): void
+    {
+        $body = json_decode(file_get_contents('php://input'), true);
+
+        if (!is_array($body)) {
+            Response::badRequest("body has to be a json");
+        }
+
+        $responseRequest = parsePatchRequestEmergency($id, $body);
+        if (!$responseRequest['isSuccess']) {
+            Response::badRequest($responseRequest['message']);
+            return;
+        }
+
+        $request = $responseRequest['object'];
+
+        if (!$request->hasChanges()) {
+            Response::badRequest("no changes to make");
+        }
+        
+        $isPatched = $this->emergencyRepo->patch($request);
+        if ($isPatched) {
+            Response::json(array('message' => 'patched'));
         } else {
             Response::json(array('message' => 'id does not exist'));
         }
