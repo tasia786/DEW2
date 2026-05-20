@@ -14,8 +14,8 @@ const tableEndpoints = {
 const queryParamMap = {
     year: 'year',
     drug_type: 'drugType',
-    seizure_type: 'column',
-    criterion_value: 'criterion',
+    seizure_type: 'seizureType', // Corectat din 'column' în 'seizureType'
+    criterion_value: 'criterion', // Corectat din 'criterion' în 'criterion'
     drug: 'drug',
     environment: 'environment',
     beneficiary: 'beneficiary',
@@ -24,7 +24,8 @@ const queryParamMap = {
     age_category: 'ageCategory',
     article: 'article',
     sentence_type: 'sentenceType',
-    law: 'law'
+    law: 'law',
+    field_name: 'fieldName'       // Adăugat (lipsea)
 };
 
 const optionsEndpoints = {
