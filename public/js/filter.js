@@ -1,33 +1,7 @@
-
-//setam query params de care avem nevoie ca sa construim endpoint ul care ne da optiunile pt fiecare filtru
-function getOptionsQuery(tableName, filterName) {
-    switch (tableName) {
-        case 'seizures':
-        case 'emergencies':
-            return { column: filterName };
-        case 'campaigns_projects':
-            return { activity: 'project', column: filterName };
-        case 'prevention_activities':
-            return { activity: 'prevention', column: filterName };
-        case 'crimes_general':
-            return { type: 'general', column: filterName };
-        case 'crimes_sex':
-            return { type: 'sex', column: filterName };
-        case 'crimes_law':
-            return { type: 'law', column: filterName };
-        case 'crimes_sentences':
-            return { type: 'sentences', column: filterName };
-        case 'criminal_groups':
-            return { type: 'groups', column: filterName };
-        default:
-            return null;
-    }
-}
-
 //construim endpoint ul final care ne da valorile pt un filtru
 async function fetchOptionsFromBackend(tableName, filterName) {
     const endpoint = optionsEndpoints[tableName];
-    const query = getOptionsQuery(tableName, filterName);
+    const query = { column: filterName };
     if (!endpoint || !query) {
         return null;
     }

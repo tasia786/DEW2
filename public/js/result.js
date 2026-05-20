@@ -15,14 +15,29 @@ function renderResults(data, tableName) {
         return;
     }
 
+    const yearsChosen = document.querySelectorAll('#dynamic-filters input[name="year"]:checked');
+    const yearsChosenCount = yearsChosen.length;
+
     const headers = getResultHeaders(data);
-    const resultContent = renderResultView(data, headers);
+    let resultContent;
+
+    
+    if (yearsChosenCount == 1 && resultViewMode === 'line') {
+        resultContent = `
+            <div class="empty-state" style="padding: var(--space-8); text-align: center; color: var(--color-text-secondary);">
+                <p style="font-size: 16px; font-weight: 500; margin-bottom: var(--space-2);">Line chart-ul nu poate fi generat</p>
+                <p style="font-size: 14px;">Vizualizarea evoluției necesită selectarea a cel puțin 2 ani diferiți în formularul de căutare.</p>
+            </div>
+        `;
+    } else {
+        resultContent = renderResultView(data, headers);
+    }
 
     resultsContainer.innerHTML = `
     <div class="card">
         <div class="card-header">
             <div class="card-title" style="margin-bottom: 0;">${data.length} rezultate</div>
-            ${renderViewControls()}
+            ${renderViewControls(yearsChosenCount)}
         </div>
         ${resultContent}
     </div>
@@ -47,12 +62,14 @@ function renderResultView(data, headers) {
 
 
 //inseram butoanele pt vizualizare+export
-function renderViewControls() {
+function renderViewControls(yearsChosenCount) {
     const views = [
         ['table', 'Tabel'],
         ['bar', 'Bar Chart'],
         ['line', 'Line Chart']
     ];
+
+    const isBadLineChart = (resultViewMode === 'line' && yearsChosenCount == 1);
 
     //butoanele de vizualizare
     let html = `
@@ -68,7 +85,7 @@ function renderViewControls() {
             </div>`;
 
     //butoanele de export svf,png si webP doar daca suntem pe un chart
-    if (resultViewMode === 'bar' || resultViewMode === 'line') {
+    if ((resultViewMode === 'bar' || resultViewMode === 'line') && !isBadLineChart) {
         html += `
             <div style="height: 20px; width: 1px; background: var(--color-border);"></div>
             <div style="display: flex; gap: var(--space-2); align-items: center;">

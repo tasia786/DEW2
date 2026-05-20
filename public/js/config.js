@@ -1,21 +1,21 @@
 const tableEndpoints = {
-    seizures: 'http://localhost:8080/api/Seizure.php',
-    emergencies: 'http://localhost:8080/api/Emergency.php',
-    campaigns_projects: 'http://localhost:8080/api/Campaigns.php',
-    prevention_activities: 'http://localhost:8080/api/Campaigns.php',
-    crimes_general: 'http://localhost:8080/api/Crimes.php',
-    crimes_sex: 'http://localhost:8080/api/Crimes.php',
-    crimes_law: 'http://localhost:8080/api/Crimes.php',
-    crimes_sentences: 'http://localhost:8080/api/Crimes.php',
-    criminal_groups: 'http://localhost:8080/api/Crimes.php',
+    seizures: 'http://localhost:8080/api/seizures',
+    emergencies: 'http://localhost:8080/api/emergencies',
+    campaigns_projects: 'http://localhost:8080/api/campaigns-projects',
+    prevention_activities: 'http://localhost:8080/api/prevention-activities',
+    crimes_general: 'http://localhost:8080/api/crimes-general',
+    crimes_sex: 'http://localhost:8080/api/crimes-sex',
+    crimes_law: 'http://localhost:8080/api/crimes-law',
+    crimes_sentences: 'http://localhost:8080/api/crimes-sentences',
+    criminal_groups: 'http://localhost:8080/api/criminal-groups',
 };
 
 //mapam denumirile filtrelor din frontend la cele din backend ca sa putem face fetch ul
 const queryParamMap = {
     year: 'year',
     drug_type: 'drugType',
-    seizure_type: 'seizureType', // Corectat din 'column' în 'seizureType'
-    criterion_value: 'criterion', // Corectat din 'criterion' în 'criterion'
+    seizure_type: 'seizureType',
+    criterion_value: 'criterion',
     drug: 'drug',
     environment: 'environment',
     beneficiary: 'beneficiary',
@@ -25,19 +25,20 @@ const queryParamMap = {
     article: 'article',
     sentence_type: 'sentenceType',
     law: 'law',
-    field_name: 'fieldName'       // Adăugat (lipsea)
+    field_name: 'fieldName',
+    type: 'type',
 };
 
 const optionsEndpoints = {
-    seizures: 'http://localhost:8080/api/OptionsSeizure.php',
-    emergencies: 'http://localhost:8080/api/OptionsEmergency.php',
-    campaigns_projects: 'http://localhost:8080/api/OptionsCampaigns.php',
-    prevention_activities: 'http://localhost:8080/api/OptionsCampaigns.php',
-    crimes_general: 'http://localhost:8080/api/OptionsCrimes.php',
-    crimes_sex: 'http://localhost:8080/api/OptionsCrimes.php',
-    crimes_law: 'http://localhost:8080/api/OptionsCrimes.php',
-    crimes_sentences: 'http://localhost:8080/api/OptionsCrimes.php',
-    criminal_groups: 'http://localhost:8080/api/OptionsCrimes.php',
+    seizures: 'http://localhost:8080/api/seizures',
+    emergencies: 'http://localhost:8080/api/emergencies',
+    campaigns_projects: 'http://localhost:8080/api/campaigns-projects',
+    prevention_activities: 'http://localhost:8080/api/prevention-activities',
+    crimes_general: 'http://localhost:8080/api/crimes-general',
+    crimes_sex: 'http://localhost:8080/api/crimes-sex',
+    crimes_law: 'http://localhost:8080/api/crimes-law',
+    crimes_sentences: 'http://localhost:8080/api/crimes-sentences',
+    criminal_groups: 'http://localhost:8080/api/criminal-groups',
 };
 
 //coloana beneficiary este creata de noi in plus fata de csv si trb traduse valorile pe care le poate lua
@@ -67,6 +68,8 @@ const tableFilters = {
     ],
     campaigns_projects: [
         { name: 'year', label: 'An', type: 'select' },
+        { name: 'type', label: 'Tip', type: 'select' }
+
     ],
     prevention_activities: [
         { name: 'year', label: 'An', type: 'select' },
@@ -92,6 +95,7 @@ const tableFilters = {
         { name: 'law', label: 'Lege', type: 'select' },
     ],
     criminal_groups: [
-        { name: 'year', label: 'An', type: 'select' }
+        { name: 'year', label: 'An', type: 'select' },
+        { name: 'field_name', label: 'Câmp', type: 'select' }
     ],
 };

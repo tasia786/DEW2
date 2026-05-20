@@ -39,6 +39,6 @@ class Validator
         // \. = for dot in Nr. Capturi
         // \/ = for / from Doze/Buc
         // \s    = spaces within a value (e.g. "În familie")
-        return (bool) preg_match('/^[\p{L}\p{N}\s_\.\/]+(,[\p{L}\p{N}\s_\.\/]+)*$/u', trim($value));
+        return (bool) preg_match('/^[\p{L}\p{N}\s_\.\/\-\<\>]+(,[\p{L}\p{N}\s_\.\/\-\<\>]+)*$/u', trim($value));
     }
 }

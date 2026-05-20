@@ -56,49 +56,17 @@ function submitSearchForm() {
     const params = new URLSearchParams();
     const filters = collectSelectedFilters();
 
-    if (tableName === 'campaigns_projects') {
-        params.set('activity', 'project');
-    }
-
-    if (tableName === 'prevention_activities') {
-        params.set('activity', 'prevention');
-    }
-
-    if (tableName.startsWith('crimes_')) {
-        const type = tableName.replace('crimes_', '');
-        params.set('type', type);
-    }
-
-    if (tableName.startsWith('criminal_')) {
-        const type = tableName.replace('criminal_', '');
-        params.set('type', type);
-    }
-
     Object.entries(filters).forEach(([filterName, value]) => {
         const paramName = queryParamMap[filterName];
-        if (!paramName || !value) return;
-        params.set(paramName, normalizeFilterValue(filterName, value));
+
+        params.set(paramName, value);
     });
 
     const url = `${endpoint}?${params.toString()}`;
     fetchResults(url, tableName);
 }
 
-function normalizeFilterValue(filterName, value) {
-    // Corecție pentru tipul de drog (în special pentru tabela Emergencies)
-    if (filterName === 'drug') {
-        // Dacă valoarea este "Stimulanti" (fără ț), o transformăm în "Stimulanți" (cu ț)
-        if (value === 'Stimulanti') return 'Stimulanți';
-        
-    }
 
-    // Păstrăm și logica existentă pentru legi
-    if (filterName === 'law') {
-        return value.replaceAll('Legea nr. ', 'Legea ');
-    }
-
-    return value;
-}
 
 function collectSelectedFilters() {
     const inputs = Array.from(document.querySelectorAll('#dynamic-filters input[type="checkbox"]'));

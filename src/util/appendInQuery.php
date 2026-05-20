@@ -28,7 +28,7 @@ function appendInQuery2(array $values, array $dbColumnNames, string $name, array
     }
 
 
-    $pageSize = 10;
+    $pageSize = 500;
     $offset = ($pageNmb - 1) * $pageSize;
     $query .= " LIMIT ? OFFSET ?";
     $params[] = $pageSize;
