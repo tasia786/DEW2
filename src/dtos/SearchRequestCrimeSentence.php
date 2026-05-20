@@ -47,8 +47,6 @@ function parseSearchRequestCrimeSentence(array $data): array
 
     if (!isset($data['sentenceType']) || trim($data['sentenceType']) === '') {
         $sentenceType = null;
-    } elseif (!Validator::isCommaSeparatedStrings($data['sentenceType'])) {
-        return ['isSuccess' => false, 'message' => 'invalid sentenceType format'];
     } else {
         $sentenceType = array_map(fn($s) => trim($s), explode(',', $data['sentenceType']));
     }
@@ -56,8 +54,6 @@ function parseSearchRequestCrimeSentence(array $data): array
 
     if (!isset($data['law']) || trim($data['law']) === '') {
         $law = null;
-    } elseif (!Validator::isCommaSeparatedStrings($data['law'])) {
-        return ['isSuccess' => false, 'message' => 'invalid law format'];
     } else {
         $law = array_map(fn($l) => trim($l), explode(',', $data['law']));
     }

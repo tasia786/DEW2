@@ -47,8 +47,6 @@ function parseSearchRequestCrimeSex(array $data): array
 
     if (!isset($data['sex']) || trim($data['sex']) === '') {
         $sex = null;
-    } elseif (!Validator::isCommaSeparatedStrings($data['sex'])) {
-        return ['isSuccess' => false, 'message' => 'invalid sex format'];
     } else {
         $sex = array_map(fn($s) => trim($s), explode(',', $data['sex']));
     }
@@ -56,8 +54,6 @@ function parseSearchRequestCrimeSex(array $data): array
   
     if (!isset($data['ageCategory']) || trim($data['ageCategory']) === '') {
         $ageCategory = null;
-    } elseif (!Validator::isCommaSeparatedStrings($data['ageCategory'])) {
-        return ['isSuccess' => false, 'message' => 'invalid ageCategory format'];
     } else {
         $ageCategory = array_map(fn($s) => trim($s), explode(',', $data['ageCategory']));
     }

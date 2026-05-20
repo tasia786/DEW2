@@ -46,16 +46,12 @@ function parseSearchRequestPrevention(array $data): array
 
     if (!isset($data['environment']) || trim($data['environment']) === '') {
         $environment = null;
-    } elseif (!Validator::isCommaSeparatedStrings($data['environment'])) {
-        return ['isSuccess' => false, 'message' => 'invalid environment format'];
     } else {
         $environment = array_map(fn($e) => trim($e), explode(',', $data['environment']));
     }
 
     if (!isset($data['beneficiary']) || trim($data['beneficiary']) === '') {
         $beneficiary = null;
-    } elseif (!Validator::isCommaSeparatedStrings($data['beneficiary'])) {
-        return ['isSuccess' => false, 'message' => 'invalid beneficiary format'];
     } else {
         $beneficiary = array_map(fn($b) => trim($b), explode(',', $data['beneficiary']));
     }

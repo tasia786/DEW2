@@ -40,8 +40,6 @@ function parseSearchRequestCrimeLaw(array $data): array
 
     if (!isset($data['article']) || trim($data['article']) === '') {
         $article = null;
-    } elseif (!Validator::isCommaSeparatedStrings($data['article'])) {
-        return ['isSuccess' => false, 'message' => 'invalid article format'];
     } else {
         $article = array_map(fn($s) => trim($s), explode(',', $data['article']));
     }

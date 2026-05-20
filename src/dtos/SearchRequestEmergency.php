@@ -47,16 +47,12 @@ function parseSearchRequestEmergency(array $data): array
 
     if (!isset($data['criterion']) || trim($data['criterion']) === '') {
         $criterion = null;
-    } elseif (!Validator::isCommaSeparatedStrings($data['criterion'])) {
-        return ['isSuccess' => false, 'message' => 'invalid criterion format'];
     } else {
         $criterion = array_map(fn($d) => trim($d), explode(',', $data['criterion']));
     }
 
     if (!isset($data['drug']) || trim($data['drug']) === '') {
         $drug = null;
-    } elseif (!Validator::isCommaSeparatedStrings($data['drug'])) {
-        return ['isSuccess' => false, 'message' => 'invalid drug format'];
     } else {
         $drug = array_map(fn($d) => trim($d), explode(',', $data['drug']));
     }

@@ -40,8 +40,6 @@ function parseSearchRequestCrimeGeneral(array $data): array
 
     if (!isset($data['category']) || trim($data['category']) === '') {
         $category = null;
-    } elseif (!Validator::isCommaSeparatedStrings($data['category'])) {
-        return ['isSuccess' => false, 'message' => 'invalid category format'];
     } else {
         $category = array_map(fn($c) => trim($c), explode(',', $data['category']));
     }

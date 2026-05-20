@@ -40,8 +40,6 @@ function parseSearchRequestCriminalGroup(array $data): array
 
     if (!isset($data['fieldName']) || trim($data['fieldName']) === '') {
         $fieldName = null;
-    } elseif (!Validator::isCommaSeparatedStrings($data['fieldName'])) {
-        return ['isSuccess' => false, 'message' => 'invalid fieldName format'];
     } else {
         $fieldName = array_map(fn($l) => trim($l), explode(',', $data['fieldName']));
     }
