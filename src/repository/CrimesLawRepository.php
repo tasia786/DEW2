@@ -81,4 +81,13 @@ class CrimesLawRepository implements RepositoryInterface
 
         return CrimeLaw::fromArrayToObjsSet($result);
     }
+
+    public function delete(Id $id): bool
+    {
+        $db   = Database::getConnection();
+        $stmt = $db->prepare("DELETE FROM crimes_law WHERE id = ?");
+        $stmt->execute([$id->getId()]);
+
+        return $stmt->rowCount() > 0;
+    }
 }

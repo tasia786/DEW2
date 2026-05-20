@@ -86,4 +86,13 @@ class CrimesSentencesRepository implements RepositoryInterface
 
         return CrimeSentence::fromArrayToObjsSet($result);
     }
+
+    public function delete(Id $id): bool
+    {
+        $db   = Database::getConnection();
+        $stmt = $db->prepare("DELETE FROM crimes_sentences WHERE id = ?");
+        $stmt->execute([$id->getId()]);
+
+        return $stmt->rowCount() > 0;
+    }
 }

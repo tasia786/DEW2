@@ -85,4 +85,13 @@ class PreventionActivitiesRepository implements RepositoryInterface
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return PreventionActivity::fromArrayToObjsSet($result);
     }
+
+     public function delete(Id $id) : bool
+    {
+        $db   = Database::getConnection();
+        $stmt = $db->prepare("DELETE FROM prevention_activities WHERE id = ?");
+        $stmt->execute([$id->getId()]);
+
+        return $stmt->rowCount() > 0;
+    }
 }
