@@ -45,7 +45,7 @@ class CampaignController
                 }
                 array_push($values, $_GET['type']);
                 array_push($columnNames, 'type');
-            }
+            }     
             $data = $this->campaignProjectRepo->selectWithFilter($values, $columnNames);
             $result = array_map(fn($c) => $c->toArray(), $data);
         } else {
@@ -64,7 +64,7 @@ class CampaignController
                     'persoane',
                     'elevi'
                 ])) {
-                    Response::badRequest('Invalid beneficiary type; alowwed: activitati_total, copii, parinti, cadre_didactice, studenti, persoane, elevi');
+                    Response::badRequest('Invalid beneficiary type; allowed: activitati_total, copii, parinti, cadre_didactice, studenti, persoane, elevi');
                     return;
                 }
                 array_push($values, $_GET['beneficiary']);

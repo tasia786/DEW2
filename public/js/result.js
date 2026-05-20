@@ -387,8 +387,6 @@ window.downloadChart = function (format) {
     if (!currentChartInstance) return;
 
     //luam numele tradus din select ul de tabel
-    const tableSelect = document.getElementById('s-table');
-
     const fileName = document.getElementById('s-table').selectedOptions[0].text;
 
     if (format === 'svg') {
