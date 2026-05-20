@@ -50,6 +50,10 @@ function parsePatchRequestCampaignProject(?string $id, array $data): array
 {
     if ($id === null || trim($id) === '') {
         return ['isSuccess' => false, 'message' => 'id is required'];
+    } elseif (!ctype_digit($id)) {
+        return ['isSuccess' => false, 'message' => 'id must be valid'];
+    } else {
+        $id = (int)$id;
     }
 
     if (!isset($data['year']) || trim($data['year']) === '') {
