@@ -4,9 +4,9 @@ class SearchRequestSeizure
     private ?array $years;
     private ?array $drugType;
     private ?array $seizureType;
-    private int $nmbPage;
+    private ?int $nmbPage;
 
-    public function __construct(?array $years, ?array $drugType, ?array $seizureType, int $nmbPage)
+    public function __construct(?array $years, ?array $drugType, ?array $seizureType, ?int $nmbPage)
     {
         $this->years = $years;
         $this->drugType = $drugType;
@@ -29,7 +29,7 @@ class SearchRequestSeizure
         return $this->seizureType;
     }
 
-    public function getNmbPage(): int
+    public function getNmbPage(): ?int
     {
         return $this->nmbPage;
     }
@@ -57,13 +57,13 @@ function parseSearchRequestSeizure(array $data): array
         $seizureType = array_map(fn($d) => trim($d), explode(',', $data['seizureType']));
     }
 
-    $nmbPage = 1;
-    if (isset($data['nmbPage']) && trim($data['nmbPage']) !== '') {
-        if (!ctype_digit(trim($data['nmbPage']))) {
-            return ['isSuccess' => false, 'message' => 'invalid page format'];
-        }
+    if (!isset($data['nmbPage']) || trim($data['nmbPage']) === '') {
+        $nmbPage = null;
+    } elseif (!ctype_digit(trim($data['nmbPage']))) {
+        return ['isSuccess' => false, 'message' => 'invalid page format'];
+    } else {
         $nmbPage = (int) $data['nmbPage'];
     }
-
+    
     return ['isSuccess' => true, 'object' => new SearchRequestSeizure($years, $drugType, $seizureType, $nmbPage)];
 }

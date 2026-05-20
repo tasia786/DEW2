@@ -3,9 +3,9 @@ class SearchRequestCriminalGroup
 {
     private ?array $years;
     private ?array $fieldName;
-    private int $nmbPage;
+    private ?int $nmbPage;
 
-    public function __construct(?array $years, ?array $fieldName, int $nmbPage)
+    public function __construct(?array $years, ?array $fieldName, ?int $nmbPage)
     {
         $this->years = $years;
         $this->fieldName = $fieldName;
@@ -22,7 +22,7 @@ class SearchRequestCriminalGroup
         return $this->fieldName;
     }
 
-    public function getNmbPage(): int
+    public function getNmbPage(): ?int
     {
         return $this->nmbPage;
     }
@@ -44,13 +44,13 @@ function parseSearchRequestCriminalGroup(array $data): array
         $fieldName = array_map(fn($l) => trim($l), explode(',', $data['fieldName']));
     }
 
-    $nmbPage = 1;
-    if (isset($data['nmbPage']) && trim($data['nmbPage']) !== '') {
-        if (!ctype_digit(trim($data['nmbPage']))) {
-            return ['isSuccess' => false, 'message' => 'invalid page format'];
-        }
+    if (!isset($data['nmbPage']) || trim($data['nmbPage']) === '') {
+        $nmbPage = null;
+    } elseif (!ctype_digit(trim($data['nmbPage']))) {
+        return ['isSuccess' => false, 'message' => 'invalid page format'];
+    } else {
         $nmbPage = (int) $data['nmbPage'];
     }
-
+    
     return ['isSuccess' => true, 'object' => new SearchRequestCriminalGroup($years, $fieldName, $nmbPage)];
 }

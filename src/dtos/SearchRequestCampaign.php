@@ -3,9 +3,9 @@ class SearchRequestCampaign
 {
     private ?array $years;
     private ?string $type;
-    private int $nmbPage;
+    private ?int $nmbPage;
 
-    public function __construct(?array $years, ?string $type, int $nmbPage)
+    public function __construct(?array $years, ?string $type, ?int $nmbPage)
     {
         $this->years = $years;
         $this->type = $type;
@@ -20,7 +20,7 @@ class SearchRequestCampaign
     {
         return $this->type;
     }
-    public function getNmbPage(): int
+    public function getNmbPage(): ?int
     {
         return $this->nmbPage;
     }
@@ -38,14 +38,14 @@ function parseSearchRequestCampaign(array $data): array
 
     $type = isset($data['type']) ? trim($data['type']) : null;
 
-    $nmbPage = 1; // default
-    if (isset($data['nmbPage']) && trim($data['nmbPage']) !== '') {
-        if (!ctype_digit(trim($data['nmbPage']))) {
-            return ['isSuccess' => false, 'message' => 'invalid page format'];
-        } else {
-            $nmbPage = (int) $data['nmbPage'];
-        }
+    if (!isset($data['nmbPage']) || trim($data['nmbPage']) === '') {
+        $nmbPage = null;
+    } elseif (!ctype_digit(trim($data['nmbPage']))) {
+        return ['isSuccess' => false, 'message' => 'invalid page format'];
+    } else {
+        $nmbPage = (int) $data['nmbPage'];
     }
+
 
     return array('isSuccess' => true, 'object' => new SearchRequestCampaign($years, $type, $nmbPage));
 }

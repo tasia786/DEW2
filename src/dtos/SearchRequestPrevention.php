@@ -4,9 +4,9 @@ class SearchRequestPrevention
     private ?array $years;
     private ?array $environment;
     private ?array $beneficiary;
-    private int $nmbPage;
+    private ?int $nmbPage;
 
-    public function __construct(?array $years, ?array $environment, ?array $beneficiary, int $nmbPage)
+    public function __construct(?array $years, ?array $environment, ?array $beneficiary, ?int $nmbPage)
     {
         $this->years       = $years;
         $this->environment = $environment;
@@ -28,7 +28,7 @@ class SearchRequestPrevention
         return $this->years;
     }
 
-    public function getNmbPage(): int
+    public function getNmbPage(): ?int
     {
         return $this->nmbPage;
     }
@@ -56,11 +56,11 @@ function parseSearchRequestPrevention(array $data): array
         $beneficiary = array_map(fn($b) => trim($b), explode(',', $data['beneficiary']));
     }
 
-    $nmbPage = 1;
-    if (isset($data['nmbPage']) && trim($data['nmbPage']) !== '') {
-        if (!ctype_digit(trim($data['nmbPage']))) {
-            return ['isSuccess' => false, 'message' => 'invalid page format'];
-        }
+    if (!isset($data['nmbPage']) || trim($data['nmbPage']) === '') {
+        $nmbPage = null;
+    } elseif (!ctype_digit(trim($data['nmbPage']))) {
+        return ['isSuccess' => false, 'message' => 'invalid page format'];
+    } else {
         $nmbPage = (int) $data['nmbPage'];
     }
 

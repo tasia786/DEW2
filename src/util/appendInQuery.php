@@ -15,7 +15,7 @@ function appendInQuery(array $values, array $dbColumnNames, string $name, array 
     return $query;
 }
 
-function appendInQuery2(array $values, array $dbColumnNames, string $name, array &$params, int $pageNmb): string
+function appendInQuery2(array $values, array $dbColumnNames, string $name, array &$params, ?int $pageNmb): string
 {
     $query = "SELECT * FROM {$name} WHERE 1=1";
     $length = count($dbColumnNames);
@@ -27,12 +27,12 @@ function appendInQuery2(array $values, array $dbColumnNames, string $name, array
         $params = array_merge($params, $valueArray);
     }
 
-
-    $pageSize = 10;
-    $offset = ($pageNmb - 1) * $pageSize;
-    $query .= " LIMIT ? OFFSET ?";
-    $params[] = $pageSize;
-    $params[] = $offset;
-
+    if ($pageNmb !== null) {
+        $pageSize = 10;
+        $offset = ($pageNmb - 1) * $pageSize;
+        $query .= " LIMIT ? OFFSET ?";
+        $params[] = $pageSize;
+        $params[] = $offset;
+    }
     return $query;
 }

@@ -4,9 +4,9 @@ class SearchRequestCrimeSex
     private ?array $years;
     private ?array $sex;
     private ?array $ageCategory;
-    private int $nmbPage;
+    private ?int $nmbPage;
 
-    public function __construct(?array $years, ?array $sex, ?array $ageCategory, int $nmbPage)
+    public function __construct(?array $years, ?array $sex, ?array $ageCategory, ?int $nmbPage)
     {
         $this->years = $years;
         $this->sex = $sex;
@@ -29,7 +29,7 @@ class SearchRequestCrimeSex
         return $this->ageCategory;
     }
 
-    public function getNmbPage(): int
+    public function getNmbPage(): ?int
     {
         return $this->nmbPage;
     }
@@ -59,11 +59,11 @@ function parseSearchRequestCrimeSex(array $data): array
     }
 
 
-    $nmbPage = 1;
-    if (isset($data['nmbPage']) && trim($data['nmbPage']) !== '') {
-        if (!ctype_digit(trim($data['nmbPage']))) {
-            return ['isSuccess' => false, 'message' => 'invalid page format'];
-        }
+    if (!isset($data['nmbPage']) || trim($data['nmbPage']) === '') {
+        $nmbPage = null;
+    } elseif (!ctype_digit(trim($data['nmbPage']))) {
+        return ['isSuccess' => false, 'message' => 'invalid page format'];
+    } else {
         $nmbPage = (int) $data['nmbPage'];
     }
 

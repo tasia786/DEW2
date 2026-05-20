@@ -4,9 +4,9 @@ class SearchRequestEmergency
     private ?array $years;
     private ?array $criterionValue;
     private ?array $drug;
-    private int $nmbPage;
+    private ?int $nmbPage;
 
-    public function __construct(?array $years, ?array $criterionValue, ?array $drug, int $nmbPage)
+    public function __construct(?array $years, ?array $criterionValue, ?array $drug, ?int $nmbPage)
     {
         $this->years = $years;
         $this->criterionValue = $criterionValue;
@@ -29,7 +29,7 @@ class SearchRequestEmergency
         return $this->drug;
     }
 
-    public function getNmbPage(): int
+    public function getNmbPage(): ?int
     {
         return $this->nmbPage;
     }
@@ -57,13 +57,13 @@ function parseSearchRequestEmergency(array $data): array
         $drug = array_map(fn($d) => trim($d), explode(',', $data['drug']));
     }
 
-    $nmbPage = 1;
-    if (isset($data['nmbPage']) && trim($data['nmbPage']) !== '') {
-        if (!ctype_digit(trim($data['nmbPage']))) {
-            return ['isSuccess' => false, 'message' => 'invalid page format'];
-        }
+    if (!isset($data['nmbPage']) || trim($data['nmbPage']) === '') {
+        $nmbPage = null;
+    } elseif (!ctype_digit(trim($data['nmbPage']))) {
+        return ['isSuccess' => false, 'message' => 'invalid page format'];
+    } else {
         $nmbPage = (int) $data['nmbPage'];
     }
-
+    
     return ['isSuccess' => true, 'object' => new SearchRequestEmergency($years, $criterion, $drug, $nmbPage)];
 }

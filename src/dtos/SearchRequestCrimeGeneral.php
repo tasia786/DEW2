@@ -3,9 +3,9 @@ class SearchRequestCrimeGeneral
 {
     private ?array $years;
     private ?array $category;
-    private int $nmbPage;
+    private ?int $nmbPage;
 
-    public function __construct(?array $years, ?array $category, int $nmbPage)
+    public function __construct(?array $years, ?array $category, ?int $nmbPage)
     {
         $this->years = $years;
         $this->category = $category;
@@ -22,7 +22,7 @@ class SearchRequestCrimeGeneral
         return $this->category;
     }
 
-    public function getNmbPage(): int
+    public function getNmbPage(): ?int
     {
         return $this->nmbPage;
     }
@@ -44,11 +44,11 @@ function parseSearchRequestCrimeGeneral(array $data): array
         $category = array_map(fn($c) => trim($c), explode(',', $data['category']));
     }
 
-    $nmbPage = 1;
-    if (isset($data['nmbPage']) && trim($data['nmbPage']) !== '') {
-        if (!ctype_digit(trim($data['nmbPage']))) {
-            return ['isSuccess' => false, 'message' => 'invalid page format'];
-        }
+    if (!isset($data['nmbPage']) || trim($data['nmbPage']) === '') {
+        $nmbPage = null;
+    } elseif (!ctype_digit(trim($data['nmbPage']))) {
+        return ['isSuccess' => false, 'message' => 'invalid page format'];
+    } else {
         $nmbPage = (int) $data['nmbPage'];
     }
 
