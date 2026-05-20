@@ -4,6 +4,7 @@ require_once __DIR__ . '/../util/appendInQuery.php';
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../model/CrimeLaw.php';
 require_once __DIR__ . '/../dtos/SearchRequestCrimeLaw.php';
+require_once __DIR__ . '/../dtos/patchDtos/PatchRequestCrimeLaw.php';
 
 class CrimesLawRepository implements RepositoryInterface
 {
@@ -87,6 +88,36 @@ class CrimesLawRepository implements RepositoryInterface
         $db   = Database::getConnection();
         $stmt = $db->prepare("DELETE FROM crimes_law WHERE id = ?");
         $stmt->execute([$id->getId()]);
+
+        return $stmt->rowCount() > 0;
+    }
+
+    public function patch(PatchRequestCrimeLaw $patchRequest): bool
+    {
+        $fields = [];
+        $params = [];
+
+        if ($patchRequest->getYear() !== null) {
+            $fields[] = 'year = ?';
+            $params[] = $patchRequest->getYear();
+        }
+        if ($patchRequest->getArticle() !== null) {
+            $fields[] = 'article = ?';
+            $params[] = $patchRequest->getArticle();
+        }
+        if ($patchRequest->getValue() !== null) {
+            $fields[] = 'value = ?';
+            $params[] = $patchRequest->getValue();
+        }
+
+        if (empty($fields)) return false;
+
+        $params[] = $patchRequest->getId();
+        $sql = 'UPDATE crimes_law SET ' . implode(', ', $fields) . ' WHERE id = ?';
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
 
         return $stmt->rowCount() > 0;
     }

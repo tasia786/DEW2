@@ -6,6 +6,7 @@ require_once __DIR__ . '/../config/Constant.php';
 require_once __DIR__ . '/../dtos/SearchRequestSeizure.php';
 require_once __DIR__ . '/../dtos/Id.php';
 require_once __DIR__ . '/../util/dtoValidators/SearchRequestSeizureValidation.php';
+require_once __DIR__ . '/../dtos/patchDtos/PatchRequestSeizure.php';
 
 class SeizuresController
 {
@@ -62,6 +63,34 @@ class SeizuresController
         $isDeleted = $this->repo->delete($request);
         if ($isDeleted) {
             Response::json(array('message' => 'deleted'));
+        } else {
+            Response::json(array('message' => 'id does not exist'));
+        }
+    }
+
+    public function patch(string $id): void
+    {
+        $body = json_decode(file_get_contents('php://input'), true);
+
+        if (!is_array($body)) {
+            Response::badRequest("body has to be a json");
+        }
+
+        $responseRequest = parsePatchRequestSeizure($id, $body);
+        if (!$responseRequest['isSuccess']) {
+            Response::badRequest($responseRequest['message']);
+            return;
+        }
+
+        $request = $responseRequest['object'];
+
+        if (!$request->hasChanges()) {
+            Response::badRequest("no changes to make");
+        }
+
+        $isPatched = $this->repo->patch($request);
+        if ($isPatched) {
+            Response::json(array('message' => 'patched'));
         } else {
             Response::json(array('message' => 'id does not exist'));
         }

@@ -4,6 +4,7 @@ require_once __DIR__ . '/../util/appendInQuery.php';
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../model/PreventionActivity.php';
 require_once __DIR__ . '/../dtos/SearchRequestPrevention.php';
+require_once __DIR__ . '/../dtos/patchDtos/PatchRequestPreventionActivity.php';
 
 class PreventionActivitiesRepository implements RepositoryInterface
 {
@@ -91,6 +92,40 @@ class PreventionActivitiesRepository implements RepositoryInterface
         $db   = Database::getConnection();
         $stmt = $db->prepare("DELETE FROM prevention_activities WHERE id = ?");
         $stmt->execute([$id->getId()]);
+
+        return $stmt->rowCount() > 0;
+    }
+
+    public function patch(PatchRequestPreventionActivity $patchRequest): bool
+    {
+        $fields = [];
+        $params = [];
+
+        if ($patchRequest->getYear() !== null) {
+            $fields[] = 'year = ?';
+            $params[] = $patchRequest->getYear();
+        }
+        if ($patchRequest->getEnvironment() !== null) {
+            $fields[] = 'environment = ?';
+            $params[] = $patchRequest->getEnvironment();
+        }
+        if ($patchRequest->getBeneficiary() !== null) {
+            $fields[] = 'beneficiary = ?';
+            $params[] = $patchRequest->getBeneficiary();
+        }
+        if ($patchRequest->getValue() !== null) {
+            $fields[] = 'value = ?';
+            $params[] = $patchRequest->getValue();
+        }
+
+        if (empty($fields)) return false;
+
+        $params[] = $patchRequest->getId();
+        $sql = 'UPDATE prevention_activities SET ' . implode(', ', $fields) . ' WHERE id = ?';
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
 
         return $stmt->rowCount() > 0;
     }

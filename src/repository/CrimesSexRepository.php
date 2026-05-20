@@ -4,6 +4,7 @@ require_once __DIR__ . '/../util/appendInQuery.php';
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../model/CrimeSex.php';
 require_once __DIR__ . '/../dtos/SearchRequestCrimeSex.php';
+require_once __DIR__ . '/../dtos/patchDtos/PatchRequestCrimeSex.php';
 
 class CrimesSexRepository implements RepositoryInterface
 {
@@ -92,6 +93,40 @@ class CrimesSexRepository implements RepositoryInterface
         $db   = Database::getConnection();
         $stmt = $db->prepare("DELETE FROM crimes_sex WHERE id = ?");
         $stmt->execute([$id->getId()]);
+
+        return $stmt->rowCount() > 0;
+    }
+
+    public function patch(PatchRequestCrimeSex $patchRequest): bool
+    {
+        $fields = [];
+        $params = [];
+
+        if ($patchRequest->getYear() !== null) {
+            $fields[] = 'year = ?';
+            $params[] = $patchRequest->getYear();
+        }
+        if ($patchRequest->getSex() !== null) {
+            $fields[] = 'sex = ?';
+            $params[] = $patchRequest->getSex();
+        }
+        if ($patchRequest->getAgeCategory() !== null) {
+            $fields[] = 'age_category = ?';
+            $params[] = $patchRequest->getAgeCategory();
+        }
+        if ($patchRequest->getValue() !== null) {
+            $fields[] = 'value = ?';
+            $params[] = $patchRequest->getValue();
+        }
+
+        if (empty($fields)) return false;
+
+        $params[] = $patchRequest->getId();
+        $sql = 'UPDATE crimes_sex SET ' . implode(', ', $fields) . ' WHERE id = ?';
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
 
         return $stmt->rowCount() > 0;
     }

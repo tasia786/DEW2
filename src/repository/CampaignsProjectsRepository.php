@@ -4,6 +4,7 @@ require_once __DIR__ . '/../util/appendInQuery.php';
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../model/CampaignProject.php';
 require_once __DIR__ . '/../dtos/SearchRequestCampaign.php';
+require_once __DIR__ . '/../dtos/patchDtos/PatchRequestCampaignProject.php';
 
 class CampaignsProjectsRepository implements RepositoryInterface
 {
@@ -85,6 +86,40 @@ class CampaignsProjectsRepository implements RepositoryInterface
         $db   = Database::getConnection();
         $stmt = $db->prepare("DELETE FROM campaigns_projects WHERE id = ?");
         $stmt->execute([$id->getId()]);
+
+        return $stmt->rowCount() > 0;
+    }
+
+    public function patch(PatchRequestCampaignProject $patchRequest): bool
+    {
+        $fields = [];
+        $params = [];
+
+        if ($patchRequest->getYear() !== null) {
+            $fields[] = 'year = ?';
+            $params[] = $patchRequest->getYear();
+        }
+        if ($patchRequest->getType() !== null) {
+            $fields[] = 'type = ?';
+            $params[] = $patchRequest->getType();
+        }
+        if ($patchRequest->getName() !== null) {
+            $fields[] = 'name = ?';
+            $params[] = $patchRequest->getName();
+        }
+        if ($patchRequest->getBeneficiariesCount() !== null) {
+            $fields[] = 'beneficiaries_count = ?';
+            $params[] = $patchRequest->getBeneficiariesCount();
+        }
+
+        if (empty($fields)) return false;
+
+        $params[] = $patchRequest->getId();
+        $sql = 'UPDATE campaigns_projects SET ' . implode(', ', $fields) . ' WHERE id = ?';
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
 
         return $stmt->rowCount() > 0;
     }

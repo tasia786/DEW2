@@ -5,6 +5,7 @@ require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../model/Seizure.php';
 require_once __DIR__ . '/../dtos/SearchRequestSeizure.php';
 require_once __DIR__ . '/../dtos/Id.php';
+require_once __DIR__ . '/../dtos/patchDtos/PatchRequestSeizure.php';
 
 class SeizuresRepository implements RepositoryInterface
 {
@@ -93,6 +94,40 @@ class SeizuresRepository implements RepositoryInterface
         $db   = Database::getConnection();
         $stmt = $db->prepare("DELETE FROM seizures WHERE id = ?");
         $stmt->execute([$id->getId()]);
+
+        return $stmt->rowCount() > 0;
+    }
+
+    public function patch(PatchRequestSeizure $patchRequest): bool
+    {
+        $fields = [];
+        $params = [];
+
+        if ($patchRequest->getYear() !== null) {
+            $fields[] = 'year = ?';
+            $params[] = $patchRequest->getYear();
+        }
+        if ($patchRequest->getDrugType() !== null) {
+            $fields[] = 'drug_type = ?';
+            $params[] = $patchRequest->getDrugType();
+        }
+        if ($patchRequest->getSeizureType() !== null) {
+            $fields[] = 'seizure_type = ?';
+            $params[] = $patchRequest->getSeizureType();
+        }
+        if ($patchRequest->getValue() !== null) {
+            $fields[] = 'value = ?';
+            $params[] = $patchRequest->getValue();
+        }
+
+        if (empty($fields)) return false;
+
+        $params[] = $patchRequest->getId();
+        $sql = 'UPDATE seizures SET ' . implode(', ', $fields) . ' WHERE id = ?';
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
 
         return $stmt->rowCount() > 0;
     }
