@@ -79,4 +79,13 @@ class CriminalGroupsRepository implements RepositoryInterface
 
         return CriminalGroup::fromArrayToObjsSet($result);
     }
+
+    public function delete(Id $id): bool
+    {
+        $db   = Database::getConnection();
+        $stmt = $db->prepare("DELETE FROM criminal_groups WHERE id = ?");
+        $stmt->execute([$id->getId()]);
+
+        return $stmt->rowCount() > 0;
+    }
 }
