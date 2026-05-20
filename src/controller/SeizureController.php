@@ -3,6 +3,8 @@ require_once __DIR__ . '/../repository/SeizuresRepository.php';
 require_once __DIR__ . '/../util/Response.php';
 require_once __DIR__ . '/../util/Validator.php';
 require_once __DIR__ . '/../config/Constant.php';
+require_once __DIR__ . '/../dtos/SearchRequestSeizure.php';
+require_once __DIR__ . '/../util/dtoValidators/SearchRequestSeizureValidation.php';
 
 class SeizuresController
 {
@@ -15,39 +17,20 @@ class SeizuresController
 
     public function executeFilter(): void
     {
-        $values      = [];
-        $columnNames = [];
-
-        if (isset($_GET['year']) && !empty($_GET['year'])) {
-            if (!Validator::validInt($_GET['year'], MIN_YEAR, MAX_YEAR)) {
-                Response::badRequest('Invalid year');
-                return;
-            }
-            array_push($values, $_GET['year']);
-            array_push($columnNames, 'year');
+        $responseRequest = parseSearchRequestSeizure($_GET);
+        if (!$responseRequest['isSuccess']) {
+            Response::badRequest($responseRequest['message']);
+            return;
         }
 
-        if (isset($_GET['column']) && !empty($_GET['column'])) {
-            if (!Validator::validString($_GET['column'], [
-                'Grame',
-                'Comprimate',
-                'Doze/Buc',
-                'Mililitri',
-                'Nr. Capturi'
-            ])) {
-                Response::badRequest('Invalid seizure type');
-                return;
-            }
-            array_push($values, $_GET['column']);
-            array_push($columnNames, 'seizure_type');
+        $request = $responseRequest['object'];
+        $validationResult = SearchRequestSeizureValidator::validate($request);
+        if (!$validationResult['isSuccess']) {
+            Response::badRequest($validationResult['message']);
+            return;
         }
 
-        if (isset($_GET['drugType']) && !empty($_GET['drugType'])) {
-            array_push($values, $_GET['drugType']);
-            array_push($columnNames, 'drug_type');
-        }
-
-        $data   = $this->repo->selectWithFilter($values, $columnNames);
+        $data = $this->repo->search($request);
         $result = array_map(fn($s) => $s->toArray(), $data);
         Response::sendData($result);
     }

@@ -26,4 +26,19 @@ class Validator
         }
         return true;
     }
+
+    public static function isCommaSeparatedIntegers(string $value): bool
+    {
+        return (bool) preg_match('/^\d+(,\d+)*$/', trim($value));
+    }
+
+    public static function isCommaSeparatedStrings(string $value): bool
+    {
+        // \p{L} = any unicode letter (covers î, ă, ș, â, etc.)
+        // \p{N} = any unicode number
+        // \. = for dot in Nr. Capturi
+        // \/ = for / from Doze/Buc
+        // \s    = spaces within a value (e.g. "În familie")
+        return (bool) preg_match('/^[\p{L}\p{N}\s_\.\/]+(,[\p{L}\p{N}\s_\.\/]+)*$/u', trim($value));
+    }
 }

@@ -3,6 +3,7 @@ require_once __DIR__ . '/RepositoryInterface.php';
 require_once __DIR__ . '/../util/appendInQuery.php';
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../model/Emergency.php';
+require_once __DIR__ . '/../dtos/SearchRequestEmergency.php';
 
 class EmergenciesRepository implements RepositoryInterface
 {
@@ -53,5 +54,36 @@ class EmergenciesRepository implements RepositoryInterface
         );
         $stmt->execute();
         return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), $columnName);
+    }
+
+    public function search(SearchRequestEmergency $searchRequest): array
+    {
+        $values = [];
+        $dbColumnNames = [];
+
+        if ($searchRequest->getYears() !== null) {
+            $values[] = $searchRequest->getYears();
+            $dbColumnNames[] = 'year';
+        }
+
+        if ($searchRequest->getCriterionValue() !== null) {
+            $values[] = $searchRequest->getCriterionValue();
+            $dbColumnNames[] = 'criterion_value';
+        }
+
+        if ($searchRequest->getDrug() !== null) {
+            $values[] = $searchRequest->getDrug();
+            $dbColumnNames[] = 'drug';
+        }
+
+        $params = [];
+        $query = appendInQuery2($values, $dbColumnNames, 'emergencies', $params, $searchRequest->getNmbPage());
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare($query);
+        $stmt->execute($params);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return Emergency::fromArrayToObjsSet($result);
     }
 }
